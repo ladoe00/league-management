@@ -1,0 +1,18 @@
+package org.nnhl.api;
+
+import java.time.LocalDate;
+
+public class Game
+{
+    private final LocalDate date;
+
+    public Game(LocalDate date)
+    {
+        this.date = date;
+    }
+
+    public LocalDate getDate()
+    {
+        return date;
+    }
+}
