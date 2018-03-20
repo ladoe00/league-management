@@ -1,13 +1,14 @@
 package org.nnhl.db;
 
+import org.jdbi.v3.sqlobject.config.RegisterRowMapper;
+import org.jdbi.v3.sqlobject.customizer.Bind;
+import org.jdbi.v3.sqlobject.statement.GetGeneratedKeys;
+import org.jdbi.v3.sqlobject.statement.SqlQuery;
+import org.jdbi.v3.sqlobject.statement.SqlUpdate;
+import org.jdbi.v3.sqlobject.transaction.Transaction;
 import org.mindrot.jbcrypt.BCrypt;
 import org.nnhl.api.Position;
 import org.nnhl.api.User;
-import org.skife.jdbi.v2.sqlobject.Bind;
-import org.skife.jdbi.v2.sqlobject.GetGeneratedKeys;
-import org.skife.jdbi.v2.sqlobject.SqlQuery;
-import org.skife.jdbi.v2.sqlobject.SqlUpdate;
-import org.skife.jdbi.v2.sqlobject.Transaction;
 
 public interface UserDAO
 {
@@ -23,8 +24,11 @@ public interface UserDAO
             @Bind("position") Position position);
 
     @SqlUpdate("INSERT INTO nnhl.password (userId, passwordHash) VALUES (:userId, :passwordHash)")
-    @GetGeneratedKeys
-    int insertPassword(@Bind("userId") int userId, @Bind("passwordHash") String passwordHash);
+    void insertPassword(@Bind("userId") int userId, @Bind("passwordHash") String passwordHash);
+
+    @SqlQuery("SELECT id, firstName, lastName, email, position from nnhl.user WHERE email = :email")
+    @RegisterRowMapper(UserMapper.class)
+    User loadUser(@Bind("email") String email);
 
     @Transaction
     default void save(User user, String password)
@@ -37,7 +41,4 @@ public interface UserDAO
 
         // System.out.println("valid?" + BCrypt.checkpw(password, hashpw));
     }
-
-    @SqlQuery("select name from something where id = :id")
-    String findNameById(@Bind("id") int id);
 }

@@ -1,17 +1,19 @@
 package org.nnhl;
 
 import org.glassfish.jersey.server.filter.RolesAllowedDynamicFeature;
+import org.jdbi.v3.core.Jdbi;
 import org.nnhl.api.User;
 import org.nnhl.core.DAOManager;
 import org.nnhl.resources.LeagueResource;
+import org.nnhl.resources.LineupResource;
+import org.nnhl.resources.SeasonResource;
 import org.nnhl.resources.UserResource;
-import org.skife.jdbi.v2.DBI;
 
 import io.dropwizard.Application;
 import io.dropwizard.auth.AuthDynamicFeature;
 import io.dropwizard.auth.AuthValueFactoryProvider;
 import io.dropwizard.auth.basic.BasicCredentialAuthFilter;
-import io.dropwizard.jdbi.DBIFactory;
+import io.dropwizard.jdbi3.JdbiFactory;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import io.federecio.dropwizard.swagger.SwaggerBundle;
@@ -47,13 +49,15 @@ public class ManagementApplication extends Application<ManagementConfiguration>
     @Override
     public void run(final ManagementConfiguration configuration, final Environment environment)
     {
-        final DBIFactory factory = new DBIFactory();
-        final DBI jdbi = factory.build(environment, configuration.getDataSourceFactory(), "mysql");
+        final JdbiFactory factory = new JdbiFactory();
+        final Jdbi jdbi = factory.build(environment, configuration.getDataSourceFactory(), "mysql");
         final DAOManager manager = new DAOManager(jdbi);
         manager.initializeDatabase();
         environment.jersey().register(new UserResource(manager.userDao));
-        // environment.jersey().register(new SeasonResource(gameDao));
-        environment.jersey().register(new LeagueResource(manager.leagueDao));
+        environment.jersey().register(new LeagueResource(manager.leagueDao, manager.userDao));
+        environment.jersey().register(new SeasonResource(manager.leagueDao, manager.gameDao));
+        environment.jersey()
+                .register(new LineupResource(manager.userDao, manager.leagueDao, manager.gameDao, manager.lineupDao));
 
         environment.jersey()
                 .register(new AuthDynamicFeature(

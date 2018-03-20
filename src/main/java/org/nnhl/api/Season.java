@@ -5,19 +5,11 @@ import java.util.List;
 
 public class Season
 {
-    private final String leagueName;
-
     private List<Game> games;
 
-    public Season(String leagueName)
+    public Season()
     {
-        this.leagueName = leagueName;
         this.games = new ArrayList<>();
-    }
-
-    public String getLeagueName()
-    {
-        return leagueName;
     }
 
     public void addGame(Game game)

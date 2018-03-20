@@ -1,7 +1,5 @@
 package org.nnhl.resources;
 
-import java.time.LocalDate;
-
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.POST;
@@ -13,9 +11,12 @@ import javax.ws.rs.core.MediaType;
 
 import org.nnhl.api.Game;
 import org.nnhl.api.League;
-import org.nnhl.api.Season;
+import org.nnhl.api.Status;
+import org.nnhl.api.User;
 import org.nnhl.db.GameDAO;
 import org.nnhl.db.LeagueDAO;
+import org.nnhl.db.LineupDAO;
+import org.nnhl.db.UserDAO;
 
 import com.codahale.metrics.annotation.Timed;
 
@@ -27,35 +28,36 @@ import io.swagger.annotations.ApiParam;
 @Path("/league")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class SeasonResource
+public class LineupResource
 {
     private final GameDAO gameDao;
 
+    private final LineupDAO lineupDao;
+
     private final LeagueDAO leagueDao;
 
-    public SeasonResource(LeagueDAO leagueDao, GameDAO gameDao)
+    private final UserDAO userDao;
+
+    public LineupResource(UserDAO userDao, LeagueDAO leagueDao, GameDAO gameDao, LineupDAO lineupDao)
     {
+        this.userDao = userDao;
         this.leagueDao = leagueDao;
+        this.lineupDao = lineupDao;
         this.gameDao = gameDao;
     }
 
     @POST
-    @Path("{leagueName}/season")
+    @Path("{leagueName}/{gameDay}/{userEmail}")
     @Timed
     public void createNewSeason(
             @ApiParam(required = true, value = "Name of the league") @PathParam("leagueName") @DefaultValue("NNHL") String leagueName,
-            @ApiParam(required = true, value = "Date of the first game (format: 'YYYY-MM-DD')") @QueryParam("startDate") LocalDateParam startDateParam,
-            @ApiParam(required = true, value = "Number of games") @QueryParam("numberOfGames") int numberOfGames)
+            @ApiParam(required = true, value = "Date of the game (format: 'YYYY-MM-DD')") @PathParam("gameDay") LocalDateParam gameDayParam,
+            @ApiParam(required = true, value = "Email of user") @PathParam("userEmail") String userEmail,
+            @ApiParam(required = true, value = "Status of user") @QueryParam("userStatus") Status userStatus)
     {
+        User user = userDao.loadUser(userEmail);
         League league = leagueDao.loadLeague(leagueName);
-        LocalDate startDate = startDateParam.get();
-        Season season = new Season();
-        for (int i = 0; i < numberOfGames; i++)
-        {
-            LocalDate date = startDate.plusWeeks(i);
-            Game game = new Game(date);
-            season.addGame(game);
-            gameDao.insert(league, season, game);
-        }
+        Game game = gameDao.loadGame(league, gameDayParam.get());
+        lineupDao.insert(game, user, userStatus);
     }
 }

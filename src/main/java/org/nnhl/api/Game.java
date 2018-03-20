@@ -2,7 +2,7 @@ package org.nnhl.api;
 
 import java.time.LocalDate;
 
-public class Game
+public class Game extends PersistableObject
 {
     private final LocalDate date;
 
