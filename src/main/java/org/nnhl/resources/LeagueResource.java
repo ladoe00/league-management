@@ -19,6 +19,7 @@ import org.nnhl.db.UserDAO;
 import com.codahale.metrics.annotation.Timed;
 
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 
 @Api("/league")
@@ -39,6 +40,7 @@ public class LeagueResource
 
     @POST
     @Path("{leagueName}")
+    @ApiOperation(value = "Creates a new league")
     @Timed
     public League createNewLeague(
             @ApiParam(required = true, value = "Name of the league") @PathParam("leagueName") @DefaultValue("NNHL") String leagueName)
@@ -50,6 +52,7 @@ public class LeagueResource
 
     @DELETE
     @Path("{leagueName}")
+    @ApiOperation(value = "Deletes an existing league")
     @Timed
     public League deleteLeague(
             @ApiParam(required = true, value = "Name of the league") @PathParam("leagueName") @DefaultValue("NNHL") String leagueName)
@@ -61,6 +64,7 @@ public class LeagueResource
 
     @POST
     @Path("{leagueName}/user/{userEmail}")
+    @ApiOperation(value = "Joins an existing user to a league")
     @Timed
     public void joinLeague(
             @ApiParam(required = true, value = "Name of the league to join") @PathParam("leagueName") @DefaultValue("NNHL") String leagueName,
@@ -74,6 +78,7 @@ public class LeagueResource
 
     @DELETE
     @Path("{leagueName}/user/{userEmail}")
+    @ApiOperation(value = "Makes an existing user quit a league")
     @Timed
     public void leaveLeague(
             @ApiParam(required = true, value = "Name of the league to leave") @PathParam("leagueName") @DefaultValue("NNHL") String leagueName,

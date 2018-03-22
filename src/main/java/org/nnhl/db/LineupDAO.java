@@ -11,7 +11,7 @@ public interface LineupDAO
     @SqlUpdate("CREATE TABLE IF NOT EXISTS nnhl.lineup (gameId INT NOT NULL, userId INT NOT NULL, userStatus ENUM('CONFIRMED', 'CANCELLED'), FOREIGN KEY (gameId) REFERENCES nnhl.game(id) ON DELETE CASCADE, FOREIGN KEY (userId) REFERENCES nnhl.user(id) ON DELETE CASCADE)")
     void createTable();
 
-    @SqlUpdate("INSERT INTO nnhl.lineup (leagueId, day) VALUES (:leagueId, :day)")
+    @SqlUpdate("INSERT INTO nnhl.lineup (gameId, userId, userStatus) VALUES (:gameId, :userId, :userStatus)")
     void insertLineup(@Bind("gameId") int gameId, @Bind("userId") int userId, @Bind("userStatus") Status status);
 
     default void insert(Game game, User user, Status status)

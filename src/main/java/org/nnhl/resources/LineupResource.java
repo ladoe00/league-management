@@ -22,6 +22,7 @@ import com.codahale.metrics.annotation.Timed;
 
 import io.dropwizard.jersey.jsr310.LocalDateParam;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 
 @Api("/league")
@@ -48,6 +49,7 @@ public class LineupResource
 
     @POST
     @Path("{leagueName}/{gameDay}/{userEmail}")
+    @ApiOperation(value = "Register an existing user to a game.")
     @Timed
     public void createNewSeason(
             @ApiParam(required = true, value = "Name of the league") @PathParam("leagueName") @DefaultValue("NNHL") String leagueName,

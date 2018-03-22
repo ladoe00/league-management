@@ -16,9 +16,10 @@ import org.nnhl.db.UserDAO;
 import com.codahale.metrics.annotation.Timed;
 
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 
-@Api("/user")
+@Api("User")
 @Path("/user")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
@@ -33,6 +34,7 @@ public class UserResource
 
     @POST
     @Path("{email}")
+    @ApiOperation(value = "Creates a new user")
     @Timed
     public User registerUser(
             @ApiParam(required = true, value = "First name user") @QueryParam("firstName") String firstName,

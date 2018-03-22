@@ -21,6 +21,7 @@ import com.codahale.metrics.annotation.Timed;
 
 import io.dropwizard.jersey.jsr310.LocalDateParam;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 
 @Api("/league")
@@ -41,6 +42,7 @@ public class SeasonResource
 
     @POST
     @Path("{leagueName}/season")
+    @ApiOperation(value = "Creates a new season in an existing league.")
     @Timed
     public void createNewSeason(
             @ApiParam(required = true, value = "Name of the league") @PathParam("leagueName") @DefaultValue("NNHL") String leagueName,

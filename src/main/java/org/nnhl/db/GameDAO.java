@@ -27,12 +27,13 @@ public interface GameDAO
         return game;
     }
 
-    @SqlQuery("SELECT id, day WHERE day = :day AND leagueId = :leagueId")
+    @SqlQuery("SELECT id, day FROM nnhl.game WHERE day = :day AND leagueId = :leagueId")
     @RegisterRowMapper(GameMapper.class)
     Game loadGame(@Bind("leagueId") int leagueId, @Bind("day") LocalDate day);
 
     default Game loadGame(League league, LocalDate day)
     {
+        System.out.println(day.toString());
         return this.loadGame(league.getId().get(), day);
     }
 }
