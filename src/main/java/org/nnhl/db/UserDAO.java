@@ -1,5 +1,7 @@
 package org.nnhl.db;
 
+import java.util.List;
+
 import org.jdbi.v3.sqlobject.config.RegisterRowMapper;
 import org.jdbi.v3.sqlobject.customizer.Bind;
 import org.jdbi.v3.sqlobject.statement.GetGeneratedKeys;
@@ -26,19 +28,29 @@ public interface UserDAO
     @SqlUpdate("INSERT INTO nnhl.password (userId, passwordHash) VALUES (:userId, :passwordHash)")
     void insertPassword(@Bind("userId") int userId, @Bind("passwordHash") String passwordHash);
 
-    @SqlQuery("SELECT id, firstName, lastName, email, position from nnhl.user WHERE email = :email")
+    @SqlQuery("SELECT id, firstName, lastName, email, position from nnhl.user WHERE id = :userId")
     @RegisterRowMapper(UserMapper.class)
-    User loadUser(@Bind("email") String email);
+    User loadUser(@Bind("userId") int userId);
 
     @Transaction
-    default void save(User user, String password)
+    default User save(User user, String password)
     {
         // TODO add rounds in gensalt based on compute time. Should be configurable:
         // https://dzone.com/articles/hashing-passwords-in-java-with-bcrypt
         String hashpw = BCrypt.hashpw(password, BCrypt.gensalt());
         int userId = insertUser(user.getFirstName(), user.getLastName(), user.getEmail(), user.getPosition());
+        user.setId(userId);
         insertPassword(userId, hashpw);
+        return user;
 
         // System.out.println("valid?" + BCrypt.checkpw(password, hashpw));
     }
+
+    @SqlUpdate("DELETE FROM nnhl.user WHERE id = :id")
+    void deleteUser(@Bind("id") int id);
+
+    @SqlQuery("SELECT id, firstName, lastName, email, position from nnhl.user WHERE id = :userId")
+    @RegisterRowMapper(UserMapper.class)
+    List<User> getLeagueUsers(int leagueId);
+
 }

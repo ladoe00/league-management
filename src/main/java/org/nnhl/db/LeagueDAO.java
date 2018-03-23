@@ -1,5 +1,7 @@
 package org.nnhl.db;
 
+import java.util.List;
+
 import org.jdbi.v3.sqlobject.config.RegisterRowMapper;
 import org.jdbi.v3.sqlobject.customizer.Bind;
 import org.jdbi.v3.sqlobject.statement.GetGeneratedKeys;
@@ -34,9 +36,9 @@ public interface LeagueDAO
     @SqlUpdate("UPDATE nnhl.league SET name = :name WHERE id = :id")
     void updateLeague(@Bind("id") int id, @Bind("name") String name);
 
-    @SqlQuery("SELECT id, name from nnhl.league WHERE name = :name")
+    @SqlQuery("SELECT id, name from nnhl.league WHERE id = :id")
     @RegisterRowMapper(LeagueMapper.class)
-    League loadLeague(@Bind("name") String name);
+    League loadLeague(@Bind("id") int id);
 
     @SqlUpdate("DELETE FROM nnhl.league WHERE id = :id")
     void deleteLeague(@Bind("id") int id);
@@ -77,5 +79,9 @@ public interface LeagueDAO
             this.deleteLeague(league.getId().get());
         }
     }
+
+    @SqlQuery("SELECT id, name from nnhl.league")
+    @RegisterRowMapper(LeagueMapper.class)
+    List<League> getLeagues();
 
 }

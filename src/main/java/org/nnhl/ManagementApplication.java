@@ -4,9 +4,9 @@ import org.glassfish.jersey.server.filter.RolesAllowedDynamicFeature;
 import org.jdbi.v3.core.Jdbi;
 import org.nnhl.api.User;
 import org.nnhl.core.DAOManager;
+import org.nnhl.resources.GameResource;
 import org.nnhl.resources.LeagueResource;
 import org.nnhl.resources.LineupResource;
-import org.nnhl.resources.SeasonResource;
 import org.nnhl.resources.UserResource;
 
 import io.dropwizard.Application;
@@ -55,9 +55,8 @@ public class ManagementApplication extends Application<ManagementConfiguration>
         manager.initializeDatabase();
         environment.jersey().register(new UserResource(manager.userDao));
         environment.jersey().register(new LeagueResource(manager.leagueDao, manager.userDao));
-        environment.jersey().register(new SeasonResource(manager.leagueDao, manager.gameDao));
-        environment.jersey()
-                .register(new LineupResource(manager.userDao, manager.leagueDao, manager.gameDao, manager.lineupDao));
+        environment.jersey().register(new GameResource(manager.leagueDao, manager.gameDao));
+        environment.jersey().register(new LineupResource(manager.lineupDao));
 
         environment.jersey()
                 .register(new AuthDynamicFeature(

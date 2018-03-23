@@ -1,6 +1,7 @@
 package org.nnhl.db;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import org.jdbi.v3.sqlobject.config.RegisterRowMapper;
 import org.jdbi.v3.sqlobject.customizer.Bind;
@@ -36,4 +37,8 @@ public interface GameDAO
         System.out.println(day.toString());
         return this.loadGame(league.getId().get(), day);
     }
+
+    @SqlQuery("SELECT id, day FROM nnhl.game WHERE leagueId = :leagueId")
+    @RegisterRowMapper(GameMapper.class)
+    List<Game> getGames(@Bind("leagueId") int leagueId);
 }
