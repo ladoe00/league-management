@@ -8,7 +8,7 @@ How to start the database from Docker
 How to start the web-management application
 1. If you are on Windows, I do not have a script yet (TODO).  You will have to perform the following:
 ``docker run --name mysql -it -p 3306:3306 -e MYSQL_ROOT_PASSWORD=secret -d mysql:latest``
-1. Run Main class from Eclipse
+1. Run Main class `org.nnhl.ManagementApplication` from Eclipse with the following arguments: `server <YOUR PATH>/league-management/config.yml`
 1. To check that your application is running enter url `http://localhost:8080/swagger#/`
 
 Health Check
