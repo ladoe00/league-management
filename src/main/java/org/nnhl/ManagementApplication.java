@@ -4,6 +4,7 @@ import org.glassfish.jersey.server.filter.RolesAllowedDynamicFeature;
 import org.jdbi.v3.core.Jdbi;
 import org.nnhl.api.User;
 import org.nnhl.core.DAOManager;
+import org.nnhl.db.UnableToExecuteStatementExceptionMapper;
 import org.nnhl.resources.GameResource;
 import org.nnhl.resources.LeagueResource;
 import org.nnhl.resources.LineupResource;
@@ -14,6 +15,7 @@ import io.dropwizard.auth.AuthDynamicFeature;
 import io.dropwizard.auth.AuthValueFactoryProvider;
 import io.dropwizard.auth.basic.BasicCredentialAuthFilter;
 import io.dropwizard.jdbi3.JdbiFactory;
+import io.dropwizard.jdbi3.bundles.JdbiExceptionsBundle;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import io.federecio.dropwizard.swagger.SwaggerBundle;
@@ -44,6 +46,7 @@ public class ManagementApplication extends Application<ManagementConfiguration>
                 return configuration.getSwaggerBundleConfiguration();
             }
         });
+        bootstrap.addBundle(new JdbiExceptionsBundle());
     }
 
     @Override
@@ -65,6 +68,7 @@ public class ManagementApplication extends Application<ManagementConfiguration>
         environment.jersey().register(RolesAllowedDynamicFeature.class);
         // If you want to use @Auth to inject a custom Principal type into your resource
         environment.jersey().register(new AuthValueFactoryProvider.Binder<>(User.class));
+        environment.jersey().register(new UnableToExecuteStatementExceptionMapper());
     }
 
 }

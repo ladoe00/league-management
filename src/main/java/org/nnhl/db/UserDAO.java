@@ -10,6 +10,7 @@ import org.jdbi.v3.sqlobject.statement.SqlUpdate;
 import org.jdbi.v3.sqlobject.transaction.Transaction;
 import org.mindrot.jbcrypt.BCrypt;
 import org.nnhl.api.Position;
+import org.nnhl.api.Subscription;
 import org.nnhl.api.User;
 
 public interface UserDAO
@@ -49,8 +50,11 @@ public interface UserDAO
     @SqlUpdate("DELETE FROM nnhl.user WHERE id = :id")
     void deleteUser(@Bind("id") int id);
 
-    @SqlQuery("SELECT id, firstName, lastName, email, position from nnhl.user WHERE id = :userId")
+    @SqlQuery("SELECT u.id, u.firstName, u.lastName, u.email, u.position FROM nnhl.league_user l INNER JOIN nnhl.user u WHERE l.userId = u.id AND l.leagueId = :leagueId")
     @RegisterRowMapper(UserMapper.class)
-    List<User> getLeagueUsers(int leagueId);
+    List<User> getLeagueUsers(@Bind("leagueId") int leagueId);
 
+    @SqlQuery("SELECT u.id, u.firstName, u.lastName, u.email, u.position FROM nnhl.league_user l INNER JOIN nnhl.user u WHERE l.userId = u.id AND l.leagueId = :leagueId AND l.subscription = :subscription")
+    @RegisterRowMapper(UserMapper.class)
+    List<User> getLeagueUsers(@Bind("leagueId") int leagueId, @Bind("subscription") Subscription subscription);
 }
