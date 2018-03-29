@@ -10,7 +10,6 @@ import org.jdbi.v3.sqlobject.statement.SqlQuery;
 import org.jdbi.v3.sqlobject.statement.SqlUpdate;
 import org.nnhl.api.Game;
 import org.nnhl.api.League;
-import org.nnhl.api.Season;
 
 public interface GameDAO
 {
@@ -21,7 +20,7 @@ public interface GameDAO
     @GetGeneratedKeys
     int insertGame(@Bind("leagueId") int leagueId, @Bind("day") LocalDate day);
 
-    default Game insert(League league, Season season, Game game)
+    default Game insert(League league, Game game)
     {
         int id = this.insertGame(league.getId().get(), game.getDate());
         game.setId(id);
@@ -41,4 +40,8 @@ public interface GameDAO
     @SqlQuery("SELECT id, day FROM nnhl.game WHERE leagueId = :leagueId")
     @RegisterRowMapper(GameMapper.class)
     List<Game> getGames(@Bind("leagueId") int leagueId);
+
+    @SqlQuery("SELECT id, day FROM nnhl.game WHERE id = :id")
+    @RegisterRowMapper(GameMapper.class)
+    Game loadGame(@Bind("gameId") int gameId);
 }

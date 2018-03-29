@@ -13,7 +13,6 @@ import org.nnhl.core.DAOManager;
 import org.nnhl.db.UnableToExecuteStatementExceptionMapper;
 import org.nnhl.resources.GameResource;
 import org.nnhl.resources.LeagueResource;
-import org.nnhl.resources.LineupResource;
 import org.nnhl.resources.UserResource;
 
 import io.dropwizard.Application;
@@ -59,8 +58,7 @@ public class ManagementApplication extends Application<ManagementConfiguration>
     public void run(final ManagementConfiguration configuration, final Environment environment)
     {
         // Enable CORS headers
-        final FilterRegistration.Dynamic cors =
-            environment.servlets().addFilter("CORS", CrossOriginFilter.class);
+        final FilterRegistration.Dynamic cors = environment.servlets().addFilter("CORS", CrossOriginFilter.class);
 
         // Configure CORS parameters
         cors.setInitParameter("allowedOrigins", "*");
@@ -70,7 +68,6 @@ public class ManagementApplication extends Application<ManagementConfiguration>
         // Add URL mapping
         cors.addMappingForUrlPatterns(EnumSet.allOf(DispatcherType.class), true, "/*");
 
-    	
         final JdbiFactory factory = new JdbiFactory();
         final Jdbi jdbi = factory.build(environment, configuration.getDataSourceFactory(), "mysql");
         final DAOManager manager = new DAOManager(jdbi);
@@ -78,7 +75,7 @@ public class ManagementApplication extends Application<ManagementConfiguration>
         environment.jersey().register(new UserResource(manager.userDao));
         environment.jersey().register(new LeagueResource(manager.leagueDao, manager.userDao));
         environment.jersey().register(new GameResource(manager.leagueDao, manager.gameDao));
-        environment.jersey().register(new LineupResource(manager.lineupDao));
+        // environment.jersey().register(new LineupResource(manager.lineupDao));
 
         environment.jersey()
                 .register(new AuthDynamicFeature(

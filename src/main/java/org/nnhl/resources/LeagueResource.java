@@ -16,7 +16,6 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
@@ -30,7 +29,6 @@ import org.nnhl.db.UserDAO;
 
 import com.codahale.metrics.annotation.Timed;
 
-import io.dropwizard.jersey.errors.ErrorMessage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -108,8 +106,7 @@ public class LeagueResource
         League league = leagueDao.loadLeague(leagueId);
         if (league == null)
         {
-            return Response.status(Status.NOT_FOUND)
-                    .entity(new ErrorMessage(Status.NOT_FOUND.getStatusCode(), "League does not exist")).build();
+            return Responses.notFound("League does not exist");
         }
         return Response.ok(league).build();
     }
@@ -129,14 +126,12 @@ public class LeagueResource
         League league = leagueDao.loadLeague(leagueId);
         if (league == null)
         {
-            return Response.status(Status.NOT_FOUND)
-                    .entity(new ErrorMessage(Status.NOT_FOUND.getStatusCode(), "League does not exist")).build();
+            return Responses.notFound("League does not exist");
         }
         User user = userDao.loadUser(userId);
         if (user == null)
         {
-            return Response.status(Status.NOT_FOUND)
-                    .entity(new ErrorMessage(Status.NOT_FOUND.getStatusCode(), "User does not exist")).build();
+            return Responses.notFound("User does not exist");
         }
         leagueDao.joinLeague(user, league, subscription);
         return Response.noContent().build();
@@ -156,14 +151,12 @@ public class LeagueResource
         League league = leagueDao.loadLeague(leagueId);
         if (league == null)
         {
-            return Response.status(Status.NOT_FOUND)
-                    .entity(new ErrorMessage(Status.NOT_FOUND.getStatusCode(), "League does not exist")).build();
+            return Responses.notFound("League does not exist");
         }
         User user = userDao.loadUser(userId);
         if (user == null)
         {
-            return Response.status(Status.NOT_FOUND)
-                    .entity(new ErrorMessage(Status.NOT_FOUND.getStatusCode(), "User does not exist")).build();
+            return Responses.notFound("User does not exist");
         }
         leagueDao.leaveLeague(user, league);
         return Response.noContent().build();
@@ -183,8 +176,7 @@ public class LeagueResource
         League league = leagueDao.loadLeague(leagueId);
         if (league == null)
         {
-            return Response.status(Status.NOT_FOUND)
-                    .entity(new ErrorMessage(Status.NOT_FOUND.getStatusCode(), "League does not exist")).build();
+            return Responses.notFound("League does not exist");
         }
         List<User> users = null;
 

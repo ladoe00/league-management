@@ -15,7 +15,7 @@ import org.nnhl.api.User;
 
 public interface UserDAO
 {
-    @SqlUpdate("CREATE TABLE IF NOT EXISTS nnhl.user (id INT PRIMARY KEY AUTO_INCREMENT, firstName VARCHAR(100), lastName VARCHAR(100), email VARCHAR(100) NOT NULL UNIQUE, position ENUM('GOALIE', 'DEFENSEMAN', 'FORWARD'))")
+    @SqlUpdate("CREATE TABLE IF NOT EXISTS nnhl.user (id INT PRIMARY KEY AUTO_INCREMENT, firstName VARCHAR(100) NOT NULL, lastName VARCHAR(100) NOT NULL, email VARCHAR(100) NOT NULL UNIQUE, position ENUM('GOALIE', 'DEFENSEMAN', 'FORWARD'))")
     void createUserTable();
 
     @SqlUpdate("CREATE TABLE IF NOT EXISTS nnhl.password (userId INT NOT NULL, passwordHash CHAR(60) BINARY NOT NULL, FOREIGN KEY fk_user(userId) REFERENCES nnhl.user(id) ON DELETE CASCADE)")
