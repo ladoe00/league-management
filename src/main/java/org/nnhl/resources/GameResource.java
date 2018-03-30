@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -108,6 +109,19 @@ public class GameResource
             return Responses.notFound("Game does not exist");
         }
         return Response.ok(game).build();
+    }
+
+    @DELETE
+    @Path("{gameId}")
+    @ApiOperation(value = "Deletes an existing game")
+    @ApiResponses(value =
+    { @ApiResponse(code = 204, message = "Game deleted successfully.") })
+    @Timed
+    public Response deleteGame(
+            @ApiParam(required = true, value = "Id of the game to delete") @PathParam("gameId") int gameId)
+    {
+        gameDao.deleteGame(gameId);
+        return Response.noContent().build();
     }
 
     @GET

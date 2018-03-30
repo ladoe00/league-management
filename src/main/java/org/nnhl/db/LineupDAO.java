@@ -6,19 +6,19 @@ import org.jdbi.v3.sqlobject.config.RegisterRowMapper;
 import org.jdbi.v3.sqlobject.customizer.Bind;
 import org.jdbi.v3.sqlobject.statement.SqlQuery;
 import org.jdbi.v3.sqlobject.statement.SqlUpdate;
+import org.nnhl.api.Player;
 import org.nnhl.api.Status;
-import org.nnhl.api.User;
 
 public interface LineupDAO
 {
-    @SqlUpdate("CREATE TABLE IF NOT EXISTS nnhl.lineup (gameId INT NOT NULL, userId INT NOT NULL, userStatus ENUM('CONFIRMED', 'CANCELLED'), FOREIGN KEY (gameId) REFERENCES nnhl.game(id) ON DELETE CASCADE, FOREIGN KEY (userId) REFERENCES nnhl.user(id) ON DELETE CASCADE)")
+    @SqlUpdate("CREATE TABLE IF NOT EXISTS nnhl.lineup (gameId INT NOT NULL, playerId INT NOT NULL, playerStatus ENUM('CONFIRMED', 'CANCELLED'), FOREIGN KEY (gameId) REFERENCES nnhl.game(id) ON DELETE CASCADE, FOREIGN KEY (playerId) REFERENCES nnhl.player(id) ON DELETE CASCADE)")
     void createTable();
 
-    @SqlUpdate("INSERT INTO nnhl.lineup (gameId, userId, userStatus) VALUES (:gameId, :userId, :userStatus)")
-    void insertLineup(@Bind("gameId") int gameId, @Bind("userId") int userId, @Bind("userStatus") Status status);
+    @SqlUpdate("INSERT INTO nnhl.lineup (gameId, playerId, playerStatus) VALUES (:gameId, :playerId, :playerStatus)")
+    void insertLineup(@Bind("gameId") int gameId, @Bind("playerId") int playerId, @Bind("playerStatus") Status status);
 
-    @SqlQuery("SELECT id, firstName, lastName, email, position FROM nnhl.user WHERE id IN (SELECT userId from nnhl.lineup WHERE gameId = :gameId AND userStatus = :status)")
-    @RegisterRowMapper(UserMapper.class)
-    List<User> getLineup(@Bind("gameId") int gameId, @Bind("status") Status status);
+    @SqlQuery("SELECT id, firstName, lastName, email, position FROM nnhl.player WHERE id IN (SELECT playerId from nnhl.lineup WHERE gameId = :gameId AND playerStatus = :status)")
+    @RegisterRowMapper(PlayerMapper.class)
+    List<Player> getLineup(@Bind("gameId") int gameId, @Bind("status") Status status);
 
 }

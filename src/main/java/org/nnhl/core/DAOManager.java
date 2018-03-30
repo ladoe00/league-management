@@ -5,7 +5,7 @@ import org.nnhl.db.GameDAO;
 import org.nnhl.db.LeagueDAO;
 import org.nnhl.db.LeagueMapper;
 import org.nnhl.db.LineupDAO;
-import org.nnhl.db.UserDAO;
+import org.nnhl.db.PlayerDAO;
 
 public class DAOManager
 {
@@ -13,7 +13,7 @@ public class DAOManager
 
     public final LeagueDAO leagueDao;
 
-    public final UserDAO userDao;
+    public final PlayerDAO playerDao;
 
     public final GameDAO gameDao;
 
@@ -25,7 +25,7 @@ public class DAOManager
 
         this.jdbi.registerRowMapper(new LeagueMapper());
         this.leagueDao = jdbi.onDemand(LeagueDAO.class);
-        this.userDao = jdbi.onDemand(UserDAO.class);
+        this.playerDao = jdbi.onDemand(PlayerDAO.class);
         this.gameDao = jdbi.onDemand(GameDAO.class);
         this.lineupDao = jdbi.onDemand(LineupDAO.class);
     }
@@ -34,9 +34,9 @@ public class DAOManager
     {
         this.leagueDao.createDatabase();
         this.leagueDao.createLeagueTable();
-        this.userDao.createUserTable();
-        this.userDao.createPasswordTable();
-        this.leagueDao.createLeagueUserTable();
+        this.playerDao.createPlayerTable();
+        this.playerDao.createPasswordTable();
+        this.leagueDao.createLeaguePlayerTable();
         this.gameDao.createTable();
         this.lineupDao.createTable();
     }

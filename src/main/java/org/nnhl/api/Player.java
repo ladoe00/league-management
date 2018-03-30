@@ -4,7 +4,7 @@ import java.security.Principal;
 
 import com.google.common.base.Preconditions;
 
-public class User extends PersistableObject implements Principal
+public class Player extends PersistableObject implements Principal
 {
     private final String firstName;
 
@@ -14,7 +14,7 @@ public class User extends PersistableObject implements Principal
 
     private final Position position;
 
-    public User(String firstName, String lastName, String email, Position position)
+    public Player(String firstName, String lastName, String email, Position position)
     {
         this.firstName = Preconditions.checkNotNull(firstName, "firstName cannot be null");
         this.lastName = Preconditions.checkNotNull(lastName, "lastName cannot be null");

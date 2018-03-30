@@ -8,12 +8,13 @@ import javax.servlet.FilterRegistration;
 import org.eclipse.jetty.servlets.CrossOriginFilter;
 import org.glassfish.jersey.server.filter.RolesAllowedDynamicFeature;
 import org.jdbi.v3.core.Jdbi;
-import org.nnhl.api.User;
+import org.nnhl.api.Player;
 import org.nnhl.core.DAOManager;
 import org.nnhl.db.UnableToExecuteStatementExceptionMapper;
 import org.nnhl.resources.GameResource;
 import org.nnhl.resources.LeagueResource;
-import org.nnhl.resources.UserResource;
+import org.nnhl.resources.LineupResource;
+import org.nnhl.resources.PlayerResource;
 
 import io.dropwizard.Application;
 import io.dropwizard.auth.AuthDynamicFeature;
@@ -72,18 +73,18 @@ public class ManagementApplication extends Application<ManagementConfiguration>
         final Jdbi jdbi = factory.build(environment, configuration.getDataSourceFactory(), "mysql");
         final DAOManager manager = new DAOManager(jdbi);
         manager.initializeDatabase();
-        environment.jersey().register(new UserResource(manager.userDao));
-        environment.jersey().register(new LeagueResource(manager.leagueDao, manager.userDao));
+        environment.jersey().register(new PlayerResource(manager.playerDao));
+        environment.jersey().register(new LeagueResource(manager.leagueDao, manager.playerDao));
         environment.jersey().register(new GameResource(manager.leagueDao, manager.gameDao));
-        // environment.jersey().register(new LineupResource(manager.lineupDao));
+        environment.jersey().register(new LineupResource(manager.lineupDao));
 
         environment.jersey()
                 .register(new AuthDynamicFeature(
-                        new BasicCredentialAuthFilter.Builder<User>().setAuthenticator(new NNHLAuthenticator())
+                        new BasicCredentialAuthFilter.Builder<Player>().setAuthenticator(new NNHLAuthenticator())
                                 .setAuthorizer(new NNHLAuthorizer()).setRealm("SUPER SECRET STUFF").buildAuthFilter()));
         environment.jersey().register(RolesAllowedDynamicFeature.class);
         // If you want to use @Auth to inject a custom Principal type into your resource
-        environment.jersey().register(new AuthValueFactoryProvider.Binder<>(User.class));
+        environment.jersey().register(new AuthValueFactoryProvider.Binder<>(Player.class));
         environment.jersey().register(new UnableToExecuteStatementExceptionMapper());
     }
 

@@ -1,14 +1,14 @@
 package org.nnhl;
 
-import org.nnhl.api.User;
+import org.nnhl.api.Player;
 
 import io.dropwizard.auth.Authorizer;
 
-public class NNHLAuthorizer implements Authorizer<User>
+public class NNHLAuthorizer implements Authorizer<Player>
 {
     @Override
-    public boolean authorize(User user, String role)
+    public boolean authorize(Player player, String role)
     {
-        return user.getName().equals("good-guy") && role.equals("ADMIN");
+        return player.getName().equals("good-guy") && role.equals("ADMIN");
     }
 }

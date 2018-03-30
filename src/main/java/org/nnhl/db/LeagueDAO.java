@@ -8,8 +8,8 @@ import org.jdbi.v3.sqlobject.statement.GetGeneratedKeys;
 import org.jdbi.v3.sqlobject.statement.SqlQuery;
 import org.jdbi.v3.sqlobject.statement.SqlUpdate;
 import org.nnhl.api.League;
+import org.nnhl.api.Player;
 import org.nnhl.api.Subscription;
-import org.nnhl.api.User;
 
 public interface LeagueDAO
 {
@@ -19,19 +19,19 @@ public interface LeagueDAO
     @SqlUpdate("CREATE TABLE IF NOT EXISTS nnhl.league (id INT PRIMARY KEY AUTO_INCREMENT, name VARCHAR(100) NOT NULL UNIQUE)")
     void createLeagueTable();
 
-    @SqlUpdate("CREATE TABLE IF NOT EXISTS nnhl.league_user (leagueId INT NOT NULL , userId INT NOT NULL, subscription ENUM('REGULAR', 'SPARE'), UNIQUE (leagueId, userId), FOREIGN KEY (leagueId) REFERENCES nnhl.league(id) ON DELETE CASCADE, FOREIGN KEY (userId) REFERENCES nnhl.user(id) ON DELETE CASCADE)")
-    void createLeagueUserTable();
+    @SqlUpdate("CREATE TABLE IF NOT EXISTS nnhl.league_player (leagueId INT NOT NULL , playerId INT NOT NULL, subscription ENUM('REGULAR', 'SPARE'), UNIQUE (leagueId, playerId), FOREIGN KEY (leagueId) REFERENCES nnhl.league(id) ON DELETE CASCADE, FOREIGN KEY (playerId) REFERENCES nnhl.player(id) ON DELETE CASCADE)")
+    void createLeaguePlayerTable();
 
     @SqlUpdate("INSERT INTO nnhl.league (name) VALUES (:name)")
     @GetGeneratedKeys
     int insertLeague(@Bind("name") String name);
 
-    @SqlUpdate("INSERT INTO nnhl.league_user (leagueId, userId, subscription) VALUES (:leagueId, :userId, :subscription)")
-    void insertLeagueUser(@Bind("leagueId") int leagueId, @Bind("userId") int userId,
+    @SqlUpdate("INSERT INTO nnhl.league_player (leagueId, playerId, subscription) VALUES (:leagueId, :playerId, :subscription)")
+    void insertLeaguePlayer(@Bind("leagueId") int leagueId, @Bind("playerId") int playerId,
             @Bind("subscription") Subscription subscription);
 
-    @SqlUpdate("DELETE FROM nnhl.league_user WHERE leagueId = :leagueId AND userId = :userId")
-    void deleteLeagueUser(@Bind("leagueId") int leagueId, @Bind("userId") int userId);
+    @SqlUpdate("DELETE FROM nnhl.league_player WHERE leagueId = :leagueId AND playerId = :playerId")
+    void deleteLeaguePlayer(@Bind("leagueId") int leagueId, @Bind("playerId") int playerId);
 
     @SqlUpdate("UPDATE nnhl.league SET name = :name WHERE id = :id")
     void updateLeague(@Bind("id") int id, @Bind("name") String name);
@@ -56,19 +56,19 @@ public interface LeagueDAO
         return league;
     }
 
-    default void joinLeague(User user, League league, Subscription subscription)
+    default void joinLeague(Player player, League league, Subscription subscription)
     {
-        if (league.getId().isPresent() && user.getId().isPresent())
+        if (league.getId().isPresent() && player.getId().isPresent())
         {
-            this.insertLeagueUser(league.getId().get(), user.getId().get(), subscription);
+            this.insertLeaguePlayer(league.getId().get(), player.getId().get(), subscription);
         }
     }
 
-    default void leaveLeague(User user, League league)
+    default void leaveLeague(Player player, League league)
     {
-        if (league.getId().isPresent() && user.getId().isPresent())
+        if (league.getId().isPresent() && player.getId().isPresent())
         {
-            this.deleteLeagueUser(league.getId().get(), user.getId().get());
+            this.deleteLeaguePlayer(league.getId().get(), player.getId().get());
         }
     }
 

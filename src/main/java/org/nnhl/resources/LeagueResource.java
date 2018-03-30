@@ -22,10 +22,10 @@ import javax.ws.rs.core.UriInfo;
 import org.hibernate.validator.constraints.NotBlank;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.nnhl.api.League;
+import org.nnhl.api.Player;
 import org.nnhl.api.Subscription;
-import org.nnhl.api.User;
 import org.nnhl.db.LeagueDAO;
-import org.nnhl.db.UserDAO;
+import org.nnhl.db.PlayerDAO;
 
 import com.codahale.metrics.annotation.Timed;
 
@@ -43,12 +43,12 @@ public class LeagueResource
 {
     private final LeagueDAO leagueDao;
 
-    private final UserDAO userDao;
+    private final PlayerDAO playerDao;
 
-    public LeagueResource(LeagueDAO leagueDao, UserDAO userDao)
+    public LeagueResource(LeagueDAO leagueDao, PlayerDAO playerDao)
     {
         this.leagueDao = leagueDao;
-        this.userDao = userDao;
+        this.playerDao = playerDao;
     }
 
     @POST
@@ -112,78 +112,78 @@ public class LeagueResource
     }
 
     @POST
-    @Path("{leagueId}/users/{userId}")
-    @ApiOperation(value = "Joins an existing user to a league")
+    @Path("{leagueId}/players/{playerId}")
+    @ApiOperation(value = "Joins an existing player to a league")
     @ApiResponses(value =
     { @ApiResponse(code = 204, message = "League joined successfully."),
-            @ApiResponse(code = 404, message = "League or user does not exist.") })
+            @ApiResponse(code = 404, message = "League or player does not exist.") })
     @Timed
     public Response joinLeague(
             @ApiParam(required = true, value = "Id of the league to join") @PathParam("leagueId") int leagueId,
-            @ApiParam(required = true, value = "Id of the user to join the league") @PathParam("userId") int userId,
-            @ApiParam(required = true, value = "User subscription type to the league") @DefaultValue("REGULAR") @QueryParam("subscription") Subscription subscription)
+            @ApiParam(required = true, value = "Id of the player to join the league") @PathParam("playerId") int playerId,
+            @ApiParam(required = true, value = "Player subscription type to the league") @DefaultValue("REGULAR") @QueryParam("subscription") Subscription subscription)
     {
         League league = leagueDao.loadLeague(leagueId);
         if (league == null)
         {
             return Responses.notFound("League does not exist");
         }
-        User user = userDao.loadUser(userId);
-        if (user == null)
+        Player player = playerDao.loadPlayer(playerId);
+        if (player == null)
         {
-            return Responses.notFound("User does not exist");
+            return Responses.notFound("Player does not exist");
         }
-        leagueDao.joinLeague(user, league, subscription);
+        leagueDao.joinLeague(player, league, subscription);
         return Response.noContent().build();
     }
 
     @DELETE
-    @Path("{leagueId}/users/{userId}")
-    @ApiOperation(value = "Makes an existing user quit a league")
+    @Path("{leagueId}/players/{playerId}")
+    @ApiOperation(value = "Makes an existing player quit a league")
     @ApiResponses(value =
     { @ApiResponse(code = 204, message = "League left successfully."),
-            @ApiResponse(code = 404, message = "League or user does not exist.") })
+            @ApiResponse(code = 404, message = "League or player does not exist.") })
     @Timed
     public Response leaveLeague(
             @ApiParam(required = true, value = "Id of the league to leave") @PathParam("leagueId") int leagueId,
-            @ApiParam(required = true, value = "Id of the user to leave the league") @PathParam("userId") int userId)
+            @ApiParam(required = true, value = "Id of the player to leave the league") @PathParam("playerId") int playerId)
     {
         League league = leagueDao.loadLeague(leagueId);
         if (league == null)
         {
             return Responses.notFound("League does not exist");
         }
-        User user = userDao.loadUser(userId);
-        if (user == null)
+        Player player = playerDao.loadPlayer(playerId);
+        if (player == null)
         {
-            return Responses.notFound("User does not exist");
+            return Responses.notFound("Player does not exist");
         }
-        leagueDao.leaveLeague(user, league);
+        leagueDao.leaveLeague(player, league);
         return Response.noContent().build();
     }
 
     @GET
-    @Path("{leagueId}/users")
-    @ApiOperation(value = "Returns all users from league")
+    @Path("{leagueId}/players")
+    @ApiOperation(value = "Returns all players from league")
     @ApiResponses(value =
-    { @ApiResponse(code = 200, message = "Users returned successfully.", response = User.class, responseContainer = "List"),
+    { @ApiResponse(code = 200, message = "Players returned successfully.", response = Player.class, responseContainer = "List"),
             @ApiResponse(code = 404, message = "League does not exist.") })
     @Timed
-    public Response getLeagueUsers(
+    public Response getLeaguePlayers(
             @ApiParam(required = true, value = "Id of the league") @PathParam("leagueId") int leagueId,
-            @ApiParam(required = false, value = "Return only users with the specified subscription") @QueryParam("subscription") Optional<Subscription> subscription)
+            @ApiParam(required = false, value = "Return only players with the specified subscription") @QueryParam("subscription") Optional<Subscription> subscription)
     {
         League league = leagueDao.loadLeague(leagueId);
         if (league == null)
         {
             return Responses.notFound("League does not exist");
         }
-        List<User> users = null;
+        List<Player> players = null;
 
         if (subscription.isPresent())
-            users = userDao.getLeagueUsers(leagueId, subscription.get());
+            players = playerDao.getLeaguePlayers(leagueId, subscription.get());
         else
-            users = userDao.getLeagueUsers(leagueId);
-        return Response.ok(users).build();
+            players = playerDao.getLeaguePlayers(leagueId);
+        return Response.ok(players).build();
     }
 }

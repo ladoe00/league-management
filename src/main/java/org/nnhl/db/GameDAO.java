@@ -44,4 +44,7 @@ public interface GameDAO
     @SqlQuery("SELECT id, day FROM nnhl.game WHERE id = :id")
     @RegisterRowMapper(GameMapper.class)
     Game loadGame(@Bind("gameId") int gameId);
+
+    @SqlUpdate("DELETE FROM nnhl.game WHERE id = :gameId")
+    void deleteGame(@Bind("gameId") int gameId);
 }
