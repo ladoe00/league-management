@@ -11,14 +11,18 @@ import org.nnhl.api.Status;
 
 public interface LineupDAO
 {
-    @SqlUpdate("CREATE TABLE IF NOT EXISTS nnhl.lineup (gameId INT NOT NULL, playerId INT NOT NULL, playerStatus ENUM('CONFIRMED', 'CANCELLED'), FOREIGN KEY (gameId) REFERENCES nnhl.game(id) ON DELETE CASCADE, FOREIGN KEY (playerId) REFERENCES nnhl.player(id) ON DELETE CASCADE)")
+    @SqlUpdate("CREATE TABLE IF NOT EXISTS nnhl.lineup (gameId INT NOT NULL, playerId INT NOT NULL, playerStatus ENUM('CONFIRMED', 'CANCELLED'), CONSTRAINT PK_Lineup PRIMARY KEY (gameId,playerId), FOREIGN KEY (gameId) REFERENCES nnhl.game(id) ON DELETE CASCADE, FOREIGN KEY (playerId) REFERENCES nnhl.player(id) ON DELETE CASCADE)")
     void createTable();
 
-    @SqlUpdate("INSERT INTO nnhl.lineup (gameId, playerId, playerStatus) VALUES (:gameId, :playerId, :playerStatus)")
+    @SqlUpdate("INSERT INTO nnhl.lineup (gameId, playerId, playerStatus) VALUES (:gameId, :playerId, :playerStatus) ON DUPLICATE KEY UPDATE playerStatus = :playerStatus")
     void insertLineup(@Bind("gameId") int gameId, @Bind("playerId") int playerId, @Bind("playerStatus") Status status);
 
+    // TODO : refactor this as a join
     @SqlQuery("SELECT id, firstName, lastName, email, position FROM nnhl.player WHERE id IN (SELECT playerId from nnhl.lineup WHERE gameId = :gameId AND playerStatus = :status)")
     @RegisterRowMapper(PlayerMapper.class)
     List<Player> getLineup(@Bind("gameId") int gameId, @Bind("status") Status status);
+
+    @SqlQuery("SELECT playerStatus from nnhl.lineup WHERE gameId = :gameId AND playerId = :playerId")
+    Status getPlayerStatus(@Bind("gameId") int gameId, @Bind("playerId") int playerId);
 
 }

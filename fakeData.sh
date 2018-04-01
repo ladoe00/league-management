@@ -1,7 +1,9 @@
 #!/bin/bash
 
+read -s -p "Enter admin password:" PASSWORD
+echo
 # Create league
-curl -X POST "http://localhost:8080/leagues?leagueName=NNHL" -H "accept: application/json"
+curl -u admin:"${PASSWORD}" -X POST "http://localhost:8080/leagues?leagueName=NNHL" -H "accept: application/json"
 
 #
 # Create Players
@@ -30,27 +32,27 @@ curl -X POST "http://localhost:8080/players?email=martybro%40dfd.com&firstName=M
 #
 # Subscription
 #
-curl -X POST "http://localhost:8080/leagues/1/players/1?subscription=REGULAR" -H "accept: application/json"
-curl -X POST "http://localhost:8080/leagues/1/players/2?subscription=REGULAR" -H "accept: application/json"
-curl -X POST "http://localhost:8080/leagues/1/players/3?subscription=REGULAR" -H "accept: application/json"
-curl -X POST "http://localhost:8080/leagues/1/players/4?subscription=REGULAR" -H "accept: application/json"
-curl -X POST "http://localhost:8080/leagues/1/players/5?subscription=REGULAR" -H "accept: application/json"
-curl -X POST "http://localhost:8080/leagues/1/players/6?subscription=REGULAR" -H "accept: application/json"
-curl -X POST "http://localhost:8080/leagues/1/players/7?subscription=SPARE" -H "accept: application/json"
-curl -X POST "http://localhost:8080/leagues/1/players/8?subscription=SPARE" -H "accept: application/json"
-curl -X POST "http://localhost:8080/leagues/1/players/9?subscription=SPARE" -H "accept: application/json"
-curl -X POST "http://localhost:8080/leagues/1/players/10?subscription=REGULAR" -H "accept: application/json"
-curl -X POST "http://localhost:8080/leagues/1/players/11?subscription=REGULAR" -H "accept: application/json"
-curl -X POST "http://localhost:8080/leagues/1/players/12?subscription=REGULAR" -H "accept: application/json"
-curl -X POST "http://localhost:8080/leagues/1/players/13?subscription=SPARE" -H "accept: application/json"
-curl -X POST "http://localhost:8080/leagues/1/players/14?subscription=REGULAR" -H "accept: application/json"
-curl -X POST "http://localhost:8080/leagues/1/players/15?subscription=REGULAR" -H "accept: application/json"
-curl -X POST "http://localhost:8080/leagues/1/players/16?subscription=SPARE" -H "accept: application/json"
-curl -X POST "http://localhost:8080/leagues/1/players/17?subscription=SPARE" -H "accept: application/json"
+curl -u admin:"${PASSWORD}" -X POST "http://localhost:8080/leagues/1/players/1?subscription=REGULAR" -H "accept: application/json"
+curl -u admin:"${PASSWORD}" -X POST "http://localhost:8080/leagues/1/players/2?subscription=REGULAR" -H "accept: application/json"
+curl -u admin:"${PASSWORD}" -X POST "http://localhost:8080/leagues/1/players/3?subscription=REGULAR" -H "accept: application/json"
+curl -u admin:"${PASSWORD}" -X POST "http://localhost:8080/leagues/1/players/4?subscription=REGULAR" -H "accept: application/json"
+curl -u admin:"${PASSWORD}" -X POST "http://localhost:8080/leagues/1/players/5?subscription=REGULAR" -H "accept: application/json"
+curl -u admin:"${PASSWORD}" -X POST "http://localhost:8080/leagues/1/players/6?subscription=REGULAR" -H "accept: application/json"
+curl -u admin:"${PASSWORD}" -X POST "http://localhost:8080/leagues/1/players/7?subscription=SPARE" -H "accept: application/json"
+curl -u admin:"${PASSWORD}" -X POST "http://localhost:8080/leagues/1/players/8?subscription=SPARE" -H "accept: application/json"
+curl -u admin:"${PASSWORD}" -X POST "http://localhost:8080/leagues/1/players/9?subscription=SPARE" -H "accept: application/json"
+curl -u admin:"${PASSWORD}" -X POST "http://localhost:8080/leagues/1/players/10?subscription=REGULAR" -H "accept: application/json"
+curl -u admin:"${PASSWORD}" -X POST "http://localhost:8080/leagues/1/players/11?subscription=REGULAR" -H "accept: application/json"
+curl -u admin:"${PASSWORD}" -X POST "http://localhost:8080/leagues/1/players/12?subscription=REGULAR" -H "accept: application/json"
+curl -u admin:"${PASSWORD}" -X POST "http://localhost:8080/leagues/1/players/13?subscription=SPARE" -H "accept: application/json"
+curl -u admin:"${PASSWORD}" -X POST "http://localhost:8080/leagues/1/players/14?subscription=REGULAR" -H "accept: application/json"
+curl -u admin:"${PASSWORD}" -X POST "http://localhost:8080/leagues/1/players/15?subscription=REGULAR" -H "accept: application/json"
+curl -u admin:"${PASSWORD}" -X POST "http://localhost:8080/leagues/1/players/16?subscription=SPARE" -H "accept: application/json"
+curl -u admin:"${PASSWORD}" -X POST "http://localhost:8080/leagues/1/players/17?subscription=SPARE" -H "accept: application/json"
 
 #
 # Start new season
 #
-curl -X POST "http://localhost:8080/games/newseason?leagueId=1&startDate=2018-01-01&numberOfGames=10" -H "accept: application/json"
+curl -u admin:"${PASSWORD}" -X POST "http://localhost:8080/games/newseason?leagueId=1&startDate=2018-01-01&numberOfGames=10" -H "accept: application/json"
 
 echo

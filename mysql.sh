@@ -8,5 +8,5 @@ fi
 
 MYSQL_ID=$(sudo docker ps | grep mysql | awk '{print $1}')
 echo "Waiting for mysql to startup..."
-sleep 4
+sleep 5
 sudo docker exec -it ${MYSQL_ID} mysql -u root --password=secret

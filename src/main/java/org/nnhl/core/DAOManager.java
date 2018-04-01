@@ -36,8 +36,12 @@ public class DAOManager
         this.leagueDao.createLeagueTable();
         this.playerDao.createPlayerTable();
         this.playerDao.createPasswordTable();
+        this.playerDao.createRoleTable();
         this.leagueDao.createLeaguePlayerTable();
+        this.leagueDao.createLeagueRequestTable();
         this.gameDao.createTable();
         this.lineupDao.createTable();
+
+        this.playerDao.insertAdminAccount();
     }
 }

@@ -3,6 +3,8 @@ package org.nnhl.resources;
 import java.util.List;
 import java.util.Optional;
 
+import javax.annotation.security.PermitAll;
+import javax.annotation.security.RolesAllowed;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -23,12 +25,14 @@ import org.hibernate.validator.constraints.NotBlank;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.nnhl.api.League;
 import org.nnhl.api.Player;
+import org.nnhl.api.Role;
 import org.nnhl.api.Subscription;
 import org.nnhl.db.LeagueDAO;
 import org.nnhl.db.PlayerDAO;
 
 import com.codahale.metrics.annotation.Timed;
 
+import io.dropwizard.auth.Auth;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -57,6 +61,7 @@ public class LeagueResource
     { @ApiResponse(code = 201, message = "League created successfully.", response = League.class),
             @ApiResponse(code = 409, message = "League already exists.") })
     @Timed
+    @RolesAllowed(Role.Names.ADMIN)
     public Response createNewLeague(
             @ApiParam(required = true, value = "Name of the league") @QueryParam("leagueName") @NotNull @NotBlank @NotEmpty String leagueName,
             @Context UriInfo uriInfo)
@@ -73,6 +78,7 @@ public class LeagueResource
     @ApiResponses(value =
     { @ApiResponse(code = 204, message = "League deleted successfully.") })
     @Timed
+    @RolesAllowed(Role.Names.ADMIN)
     public Response deleteLeague(
             @ApiParam(required = true, value = "Id of the league to delete") @PathParam("leagueId") int leagueId)
     {
@@ -87,6 +93,7 @@ public class LeagueResource
     @ApiResponses(value =
     { @ApiResponse(code = 200, message = "Leagues returned successfully.", response = League.class, responseContainer = "List") })
     @Timed
+    @PermitAll
     public Response getLeagues()
     {
         List<League> leagues = leagueDao.getLeagues();
@@ -112,13 +119,13 @@ public class LeagueResource
     }
 
     @POST
-    @Path("{leagueId}/players/{playerId}")
-    @ApiOperation(value = "Joins an existing player to a league")
+    @Path("{leagueId}/requests/{playerId}")
+    @ApiOperation(value = "Request to join an existing player to a league")
     @ApiResponses(value =
-    { @ApiResponse(code = 204, message = "League joined successfully."),
+    { @ApiResponse(code = 204, message = "Request sent successfully."),
             @ApiResponse(code = 404, message = "League or player does not exist.") })
     @Timed
-    public Response joinLeague(
+    public Response requestToJoinLeague(
             @ApiParam(required = true, value = "Id of the league to join") @PathParam("leagueId") int leagueId,
             @ApiParam(required = true, value = "Id of the player to join the league") @PathParam("playerId") int playerId,
             @ApiParam(required = true, value = "Player subscription type to the league") @DefaultValue("REGULAR") @QueryParam("subscription") Subscription subscription)
@@ -133,6 +140,36 @@ public class LeagueResource
         {
             return Responses.notFound("Player does not exist");
         }
+        leagueDao.insertRequestToJoinLeague(leagueId, playerId, subscription);
+        return Response.noContent().build();
+    }
+
+    @POST
+    @Path("{leagueId}/players/{playerId}")
+    @ApiOperation(value = "Joins an existing player to a league")
+    @ApiResponses(value =
+    { @ApiResponse(code = 204, message = "League joined successfully."),
+            @ApiResponse(code = 404, message = "League or player does not exist.") })
+    @Timed
+    @RolesAllowed(
+    { Role.Names.ADMIN, Role.Names.MANAGER })
+    public Response joinLeague(
+            @ApiParam(required = true, value = "Id of the league to join") @PathParam("leagueId") int leagueId,
+            @ApiParam(required = true, value = "Id of the player to join the league") @PathParam("playerId") int playerId,
+            @ApiParam(required = true, value = "Player subscription type to the league") @DefaultValue("REGULAR") @QueryParam("subscription") Subscription subscription,
+            @Auth Player principal)
+    {
+        League league = leagueDao.loadLeague(leagueId);
+        if (league == null)
+        {
+            return Responses.notFound("League does not exist");
+        }
+        Player player = playerDao.loadPlayer(playerId);
+        if (player == null)
+        {
+            return Responses.notFound("Player does not exist");
+        }
+        System.out.println(principal.getEmail());
         leagueDao.joinLeague(player, league, subscription);
         return Response.noContent().build();
     }

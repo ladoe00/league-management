@@ -13,7 +13,6 @@ import org.nnhl.core.DAOManager;
 import org.nnhl.db.UnableToExecuteStatementExceptionMapper;
 import org.nnhl.resources.GameResource;
 import org.nnhl.resources.LeagueResource;
-import org.nnhl.resources.LineupResource;
 import org.nnhl.resources.PlayerResource;
 
 import io.dropwizard.Application;
@@ -75,13 +74,14 @@ public class ManagementApplication extends Application<ManagementConfiguration>
         manager.initializeDatabase();
         environment.jersey().register(new PlayerResource(manager.playerDao));
         environment.jersey().register(new LeagueResource(manager.leagueDao, manager.playerDao));
-        environment.jersey().register(new GameResource(manager.leagueDao, manager.gameDao));
-        environment.jersey().register(new LineupResource(manager.lineupDao));
+        environment.jersey()
+                .register(new GameResource(manager.leagueDao, manager.gameDao, manager.lineupDao, manager.playerDao));
 
         environment.jersey()
-                .register(new AuthDynamicFeature(
-                        new BasicCredentialAuthFilter.Builder<Player>().setAuthenticator(new NNHLAuthenticator())
-                                .setAuthorizer(new NNHLAuthorizer()).setRealm("SUPER SECRET STUFF").buildAuthFilter()));
+                .register(new AuthDynamicFeature(new BasicCredentialAuthFilter.Builder<Player>()
+                        .setAuthenticator(new NNHLAuthenticator(manager.playerDao))
+                        .setAuthorizer(new NNHLAuthorizer(manager.playerDao)).setRealm("SUPER SECRET STUFF")
+                        .buildAuthFilter()));
         environment.jersey().register(RolesAllowedDynamicFeature.class);
         // If you want to use @Auth to inject a custom Principal type into your resource
         environment.jersey().register(new AuthValueFactoryProvider.Binder<>(Player.class));

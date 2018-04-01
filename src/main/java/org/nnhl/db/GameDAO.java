@@ -41,7 +41,7 @@ public interface GameDAO
     @RegisterRowMapper(GameMapper.class)
     List<Game> getGames(@Bind("leagueId") int leagueId);
 
-    @SqlQuery("SELECT id, day FROM nnhl.game WHERE id = :id")
+    @SqlQuery("SELECT id, day FROM nnhl.game WHERE id = :gameId")
     @RegisterRowMapper(GameMapper.class)
     Game loadGame(@Bind("gameId") int gameId);
 

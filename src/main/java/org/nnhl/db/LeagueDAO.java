@@ -22,12 +22,19 @@ public interface LeagueDAO
     @SqlUpdate("CREATE TABLE IF NOT EXISTS nnhl.league_player (leagueId INT NOT NULL , playerId INT NOT NULL, subscription ENUM('REGULAR', 'SPARE'), UNIQUE (leagueId, playerId), FOREIGN KEY (leagueId) REFERENCES nnhl.league(id) ON DELETE CASCADE, FOREIGN KEY (playerId) REFERENCES nnhl.player(id) ON DELETE CASCADE)")
     void createLeaguePlayerTable();
 
+    @SqlUpdate("CREATE TABLE IF NOT EXISTS nnhl.league_request (leagueId INT NOT NULL , playerId INT NOT NULL, subscription ENUM('REGULAR', 'SPARE'), UNIQUE (leagueId, playerId), FOREIGN KEY (leagueId) REFERENCES nnhl.league(id) ON DELETE CASCADE, FOREIGN KEY (playerId) REFERENCES nnhl.player(id) ON DELETE CASCADE)")
+    void createLeagueRequestTable();
+
     @SqlUpdate("INSERT INTO nnhl.league (name) VALUES (:name)")
     @GetGeneratedKeys
     int insertLeague(@Bind("name") String name);
 
     @SqlUpdate("INSERT INTO nnhl.league_player (leagueId, playerId, subscription) VALUES (:leagueId, :playerId, :subscription)")
     void insertLeaguePlayer(@Bind("leagueId") int leagueId, @Bind("playerId") int playerId,
+            @Bind("subscription") Subscription subscription);
+
+    @SqlUpdate("INSERT INTO nnhl.league_request (leagueId, playerId, subscription) VALUES (:leagueId, :playerId, :subscription)")
+    void insertRequestToJoinLeague(@Bind("leagueId") int leagueId, @Bind("playerId") int playerId,
             @Bind("subscription") Subscription subscription);
 
     @SqlUpdate("DELETE FROM nnhl.league_player WHERE leagueId = :leagueId AND playerId = :playerId")
