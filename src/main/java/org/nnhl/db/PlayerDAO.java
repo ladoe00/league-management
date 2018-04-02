@@ -1,6 +1,7 @@
 package org.nnhl.db;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.jdbi.v3.sqlobject.config.RegisterRowMapper;
 import org.jdbi.v3.sqlobject.customizer.Bind;
@@ -26,9 +27,9 @@ public interface PlayerDAO
     @SqlUpdate("CREATE TABLE IF NOT EXISTS nnhl.password (playerId INT NOT NULL, passwordHash CHAR(60) BINARY NOT NULL, FOREIGN KEY fk_pass_player(playerId) REFERENCES nnhl.player(id) ON DELETE CASCADE)")
     void createPasswordTable();
 
-    @SqlUpdate("CREATE TABLE IF NOT EXISTS nnhl.role (playerId INT NOT NULL, role ENUM('" + Role.Names.ADMIN + "', '"
-            + Role.Names.MANAGER
-            + "') NOT NULL, FOREIGN KEY fk_role_player(playerId) REFERENCES nnhl.player(id) ON DELETE CASCADE)")
+    @SqlUpdate("CREATE TABLE IF NOT EXISTS nnhl.role (playerId INT NOT NULL, leagueId INT, role ENUM('"
+            + Role.Names.ADMIN + "', '" + Role.Names.MANAGER
+            + "') NOT NULL, FOREIGN KEY fk_role_player(playerId) REFERENCES nnhl.player(id) ON DELETE CASCADE, FOREIGN KEY fk_role_league(leagueId) REFERENCES nnhl.league(id) ON DELETE CASCADE)")
     void createRoleTable();
 
     @SqlUpdate("INSERT INTO nnhl.player (firstName, lastName, email, position) VALUES (:firstName, :lastName, :email, :position)")
@@ -39,8 +40,9 @@ public interface PlayerDAO
     @SqlUpdate("INSERT INTO nnhl.password (playerId, passwordHash) VALUES (:playerId, :passwordHash)")
     void insertPassword(@Bind("playerId") int playerId, @Bind("passwordHash") String passwordHash);
 
-    @SqlUpdate("INSERT INTO nnhl.role (playerId, role) VALUES (:playerId, :role)")
-    void insertRole(@Bind("playerId") int playerId, @Bind("role") Role role);
+    @SqlUpdate("INSERT INTO nnhl.role (playerId, leagueId, role) VALUES (:playerId, :leagueId, :role)")
+    void insertRole(@Bind("playerId") int playerId, @Bind("leagueId") Optional<Integer> leagueId,
+            @Bind("role") Role role);
 
     @SqlQuery("SELECT role FROM nnhl.role where playerId = :playerId")
     List<Role> getRoles(@Bind("playerId") int playerId);
@@ -68,7 +70,7 @@ public interface PlayerDAO
             // No admin account yet, create one.
             int adminId = this.insertPlayer("admin", "admin", adminEmail, Position.GOALIE);
             this.insertPassword(adminId, passwordHash);
-            this.insertRole(adminId, Role.ADMIN);
+            this.insertRole(adminId, Optional.empty(), Role.ADMIN);
         }
     }
 

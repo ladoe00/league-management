@@ -11,6 +11,7 @@ import org.jdbi.v3.core.Jdbi;
 import org.nnhl.api.Player;
 import org.nnhl.core.DAOManager;
 import org.nnhl.db.UnableToExecuteStatementExceptionMapper;
+import org.nnhl.resources.AuthenticationResource;
 import org.nnhl.resources.GameResource;
 import org.nnhl.resources.LeagueResource;
 import org.nnhl.resources.PlayerResource;
@@ -62,7 +63,7 @@ public class ManagementApplication extends Application<ManagementConfiguration>
 
         // Configure CORS parameters
         cors.setInitParameter("allowedOrigins", "*");
-        cors.setInitParameter("allowedHeaders", "X-Requested-With,Content-Type,Accept,Origin");
+        cors.setInitParameter("allowedHeaders", "Authorization,X-Requested-With,Content-Type,Accept,Origin");
         cors.setInitParameter("allowedMethods", "OPTIONS,GET,PUT,POST,DELETE,HEAD");
 
         // Add URL mapping
@@ -72,6 +73,7 @@ public class ManagementApplication extends Application<ManagementConfiguration>
         final Jdbi jdbi = factory.build(environment, configuration.getDataSourceFactory(), "mysql");
         final DAOManager manager = new DAOManager(jdbi);
         manager.initializeDatabase();
+        environment.jersey().register(new AuthenticationResource());
         environment.jersey().register(new PlayerResource(manager.playerDao));
         environment.jersey().register(new LeagueResource(manager.leagueDao, manager.playerDao));
         environment.jersey()

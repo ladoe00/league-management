@@ -18,6 +18,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
@@ -149,6 +150,7 @@ public class LeagueResource
     @ApiOperation(value = "Joins an existing player to a league")
     @ApiResponses(value =
     { @ApiResponse(code = 204, message = "League joined successfully."),
+            @ApiResponse(code = 401, message = "Unauthorized to join this league."),
             @ApiResponse(code = 404, message = "League or player does not exist.") })
     @Timed
     @RolesAllowed(
@@ -159,19 +161,26 @@ public class LeagueResource
             @ApiParam(required = true, value = "Player subscription type to the league") @DefaultValue("REGULAR") @QueryParam("subscription") Subscription subscription,
             @Auth Player principal)
     {
-        League league = leagueDao.loadLeague(leagueId);
-        if (league == null)
+        if (playerDao.getRoles(principal.getId().get()).contains(Role.ADMIN))
         {
-            return Responses.notFound("League does not exist");
+            League league = leagueDao.loadLeague(leagueId);
+            if (league == null)
+            {
+                return Responses.notFound("League does not exist");
+            }
+            Player player = playerDao.loadPlayer(playerId);
+            if (player == null)
+            {
+                return Responses.notFound("Player does not exist");
+            }
+            System.out.println(principal.getEmail());
+            leagueDao.joinLeague(player, league, subscription);
+            return Response.noContent().build();
         }
-        Player player = playerDao.loadPlayer(playerId);
-        if (player == null)
+        else
         {
-            return Responses.notFound("Player does not exist");
+            return Response.status(Status.UNAUTHORIZED).build();
         }
-        System.out.println(principal.getEmail());
-        leagueDao.joinLeague(player, league, subscription);
-        return Response.noContent().build();
     }
 
     @DELETE
