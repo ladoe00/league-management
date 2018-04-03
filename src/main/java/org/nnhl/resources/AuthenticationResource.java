@@ -29,7 +29,7 @@ public class AuthenticationResource
     @Path("login")
     @ApiOperation(value = "Verify that a user can login to the system.")
     @ApiResponses(value =
-    { @ApiResponse(code = 201, message = "Player authenticated successfully."),
+    { @ApiResponse(code = 204, message = "Player authenticated successfully."),
             @ApiResponse(code = 401, message = "Player cannot be authenticated.") })
     @Timed
     @PermitAll
