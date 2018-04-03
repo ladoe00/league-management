@@ -43,6 +43,7 @@ public class Player extends PersistableObject implements Principal
     }
 
     @Override
+    @JsonIgnore
     public String getName()
     {
         return email;
