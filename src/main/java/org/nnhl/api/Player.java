@@ -2,6 +2,7 @@ package org.nnhl.api;
 
 import java.security.Principal;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Preconditions;
 
 public class Player extends PersistableObject implements Principal
