@@ -90,14 +90,29 @@ public class LeagueResource
     }
 
     @GET
-    @ApiOperation(value = "Returns all existing leagues")
+    @ApiOperation(value = "Returns all existing leagues or leagues for a specific player")
     @ApiResponses(value =
-    { @ApiResponse(code = 200, message = "Leagues returned successfully.", response = League.class, responseContainer = "List") })
+    { @ApiResponse(code = 200, message = "Leagues returned successfully.", response = League.class, responseContainer = "List"),
+            @ApiResponse(code = 404, message = "Player does not exist.") })
     @Timed
     @PermitAll
-    public Response getLeagues()
+    public Response getLeagues(
+            @ApiParam(required = false, value = "Id of the player to use as a filter") @QueryParam("playerId") Optional<Integer> playerId)
     {
-        List<League> leagues = leagueDao.getLeagues();
+        List<League> leagues = null;
+        if (playerId.isPresent())
+        {
+            Player player = playerDao.loadPlayer(playerId.get());
+            if (player == null)
+            {
+                return Responses.notFound("Player does not exist");
+            }
+            leagues = leagueDao.getLeagues(playerId.get());
+        }
+        else
+        {
+            leagues = leagueDao.getLeagues();
+        }
         return Response.ok(leagues).build();
     }
 

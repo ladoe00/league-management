@@ -32,7 +32,6 @@ curl -X POST "http://localhost:8080/players?email=martybro%40dfd.com&firstName=M
 #
 # Subscription
 #
-curl -u admin:"${PASSWORD}" -X POST "http://localhost:8080/leagues/1/players/1?subscription=REGULAR" -H "accept: application/json"
 curl -u admin:"${PASSWORD}" -X POST "http://localhost:8080/leagues/1/players/2?subscription=REGULAR" -H "accept: application/json"
 curl -u admin:"${PASSWORD}" -X POST "http://localhost:8080/leagues/1/players/3?subscription=REGULAR" -H "accept: application/json"
 curl -u admin:"${PASSWORD}" -X POST "http://localhost:8080/leagues/1/players/4?subscription=REGULAR" -H "accept: application/json"
@@ -49,6 +48,7 @@ curl -u admin:"${PASSWORD}" -X POST "http://localhost:8080/leagues/1/players/14?
 curl -u admin:"${PASSWORD}" -X POST "http://localhost:8080/leagues/1/players/15?subscription=REGULAR" -H "accept: application/json"
 curl -u admin:"${PASSWORD}" -X POST "http://localhost:8080/leagues/1/players/16?subscription=SPARE" -H "accept: application/json"
 curl -u admin:"${PASSWORD}" -X POST "http://localhost:8080/leagues/1/players/17?subscription=SPARE" -H "accept: application/json"
+curl -u admin:"${PASSWORD}" -X POST "http://localhost:8080/leagues/1/players/18?subscription=SPARE" -H "accept: application/json"
 
 #
 # Start new season

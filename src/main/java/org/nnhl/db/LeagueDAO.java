@@ -91,4 +91,8 @@ public interface LeagueDAO
     @RegisterRowMapper(LeagueMapper.class)
     List<League> getLeagues();
 
+    @SqlQuery("SELECT l.id, l.name from nnhl.league l INNER JOIN nnhl.league_player p WHERE p.playerId = :playerId AND l.id = p.leagueId")
+    @RegisterRowMapper(LeagueMapper.class)
+    List<League> getLeagues(@Bind("playerId") int playerId);
+
 }
