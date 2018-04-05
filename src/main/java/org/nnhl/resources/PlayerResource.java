@@ -1,5 +1,7 @@
 package org.nnhl.resources;
 
+import java.util.List;
+
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -20,6 +22,7 @@ import org.hibernate.validator.constraints.NotBlank;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.nnhl.api.Player;
 import org.nnhl.api.Position;
+import org.nnhl.api.Role;
 import org.nnhl.db.PlayerDAO;
 
 import com.codahale.metrics.annotation.Timed;
@@ -80,6 +83,25 @@ public class PlayerResource
             return Responses.notFound("Player does not exist");
         }
         return Response.ok(player).build();
+    }
+
+    @GET
+    @Path("{playerId}/roles")
+    @ApiOperation(value = "Returns the player roles.")
+    @ApiResponses(value =
+    { @ApiResponse(code = 200, message = "Player roles returned successfully.", response = Role.class, responseContainer = "List"),
+            @ApiResponse(code = 404, message = "Player does not exist.") })
+    @Timed
+    public Response getPlayerRoles(
+            @ApiParam(required = true, value = "Id of the player") @PathParam("playerId") int playerId)
+    {
+        Player player = playerDao.loadPlayer(playerId);
+        if (player == null)
+        {
+            return Responses.notFound("Player does not exist");
+        }
+        List<Role> roles = playerDao.getRoles(playerId);
+        return Response.ok(roles).build();
     }
 
     @DELETE

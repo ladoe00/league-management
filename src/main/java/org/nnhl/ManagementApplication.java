@@ -73,7 +73,7 @@ public class ManagementApplication extends Application<ManagementConfiguration>
         final Jdbi jdbi = factory.build(environment, configuration.getDataSourceFactory(), "mysql");
         final DAOManager manager = new DAOManager(jdbi);
         manager.initializeDatabase();
-        environment.jersey().register(new AuthenticationResource());
+        environment.jersey().register(new AuthenticationResource(manager.playerDao));
         environment.jersey().register(new PlayerResource(manager.playerDao));
         environment.jersey().register(new LeagueResource(manager.leagueDao, manager.playerDao));
         environment.jersey()
