@@ -1,4 +1,4 @@
-package org.nnhl;
+package org.nnhl.auth;
 
 import java.util.List;
 
@@ -8,11 +8,11 @@ import org.nnhl.db.PlayerDAO;
 
 import io.dropwizard.auth.Authorizer;
 
-public class NNHLAuthorizer implements Authorizer<Player>
+public class PlayerAuthorizer implements Authorizer<Player>
 {
     private final PlayerDAO playerDao;
 
-    public NNHLAuthorizer(PlayerDAO playerDao)
+    public PlayerAuthorizer(PlayerDAO playerDao)
     {
         this.playerDao = playerDao;
     }
@@ -22,6 +22,7 @@ public class NNHLAuthorizer implements Authorizer<Player>
     {
         if (player != null && player.getId().isPresent())
         {
+            // TODO Get roles from player instead of fetching from database
             List<Role> playerRoles = this.playerDao.getRoles(player.getId().get());
             return playerRoles.contains(Role.valueOf(role));
         }

@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -31,6 +32,7 @@ import org.nnhl.db.PlayerDAO;
 
 import com.codahale.metrics.annotation.Timed;
 
+import io.dropwizard.auth.Auth;
 import io.dropwizard.jersey.jsr310.LocalDateParam;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -42,6 +44,7 @@ import io.swagger.annotations.ApiResponses;
 @Path("/games")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
+@PermitAll
 public class GameResource
 {
     private final GameDAO gameDao;
@@ -70,7 +73,7 @@ public class GameResource
     public Response createNewGame(
             @ApiParam(required = true, value = "Id of the league") @QueryParam("leagueId") int leagueId,
             @ApiParam(required = true, value = "Date of the game (format: 'YYYY-MM-DD')") @QueryParam("gameDate") LocalDateParam gameDateParam,
-            @Context UriInfo uriInfo)
+            @ApiParam(hidden = true) @Context UriInfo uriInfo, @ApiParam(hidden = true) @Auth Player player)
     {
         League league = leagueDao.loadLeague(leagueId);
         if (league == null)

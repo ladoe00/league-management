@@ -35,15 +35,23 @@ import com.codahale.metrics.annotation.Timed;
 
 import io.dropwizard.auth.Auth;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiKeyAuthDefinition;
+import io.swagger.annotations.ApiKeyAuthDefinition.ApiKeyLocation;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.Authorization;
+import io.swagger.annotations.SecurityDefinition;
+import io.swagger.annotations.SwaggerDefinition;
 
 @Api("League")
 @Path("/leagues")
+@SwaggerDefinition(securityDefinition = @SecurityDefinition(apiKeyAuthDefinitions =
+{ @ApiKeyAuthDefinition(key = "jwt-auth", name = "Authorization", in = ApiKeyLocation.HEADER) }))
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
+@PermitAll
 public class LeagueResource
 {
     private final LeagueDAO leagueDao;
@@ -57,15 +65,16 @@ public class LeagueResource
     }
 
     @POST
-    @ApiOperation(value = "Creates a new league")
+    @ApiOperation(value = "Creates a new league", authorizations = @Authorization(value = "jwt-auth"))
     @ApiResponses(value =
     { @ApiResponse(code = 201, message = "League created successfully.", response = League.class),
+            @ApiResponse(code = 403, message = "User is not authorized."),
             @ApiResponse(code = 409, message = "League already exists.") })
     @Timed
     @RolesAllowed(Role.Names.ADMIN)
     public Response createNewLeague(
             @ApiParam(required = true, value = "Name of the league") @QueryParam("leagueName") @NotNull @NotBlank @NotEmpty String leagueName,
-            @Context UriInfo uriInfo)
+            @ApiParam(hidden = true) @Auth Player player, @ApiParam(hidden = true) @Context UriInfo uriInfo)
     {
         League league = new League(leagueName);
         leagueDao.saveOrUpdate(league);
@@ -75,13 +84,15 @@ public class LeagueResource
 
     @DELETE
     @Path("{leagueId}")
-    @ApiOperation(value = "Deletes an existing league")
+    @ApiOperation(value = "Deletes an existing league", authorizations = @Authorization(value = "jwt-auth"))
     @ApiResponses(value =
-    { @ApiResponse(code = 204, message = "League deleted successfully.") })
+    { @ApiResponse(code = 204, message = "League deleted successfully."),
+            @ApiResponse(code = 403, message = "User is not authorized.") })
     @Timed
     @RolesAllowed(Role.Names.ADMIN)
     public Response deleteLeague(
-            @ApiParam(required = true, value = "Id of the league to delete") @PathParam("leagueId") int leagueId)
+            @ApiParam(required = true, value = "Id of the league to delete") @PathParam("leagueId") int leagueId,
+            @ApiParam(hidden = true) @Auth Player player)
     {
         League league = leagueDao.loadLeague(leagueId);
         if (league != null)
@@ -90,14 +101,16 @@ public class LeagueResource
     }
 
     @GET
-    @ApiOperation(value = "Returns all existing leagues or leagues for a specific player")
+    @ApiOperation(value = "Returns all existing leagues or leagues for a specific player", authorizations = @Authorization(value = "jwt-auth"))
     @ApiResponses(value =
     { @ApiResponse(code = 200, message = "Leagues returned successfully.", response = League.class, responseContainer = "List"),
+            @ApiResponse(code = 403, message = "User is not authorized."),
             @ApiResponse(code = 404, message = "Player does not exist.") })
     @Timed
     @PermitAll
     public Response getLeagues(
-            @ApiParam(required = false, value = "Id of the player to use as a filter") @QueryParam("playerId") Optional<Integer> playerId)
+            @ApiParam(required = false, value = "Id of the player to use as a filter") @QueryParam("playerId") Optional<Integer> playerId,
+            @ApiParam(hidden = true) @Auth Player principal)
     {
         List<League> leagues = null;
         if (playerId.isPresent())
@@ -118,9 +131,10 @@ public class LeagueResource
 
     @GET
     @Path("{leagueId}")
-    @ApiOperation(value = "Returns the league with the specified id")
+    @ApiOperation(value = "Returns the league with the specified id", authorizations = @Authorization(value = "jwt-auth"))
     @ApiResponses(value =
     { @ApiResponse(code = 200, message = "League returned successfully.", response = League.class),
+            @ApiResponse(code = 403, message = "User is not authorized."),
             @ApiResponse(code = 404, message = "League does not exist.") })
     @Timed
     public Response getLeague(
@@ -136,9 +150,10 @@ public class LeagueResource
 
     @POST
     @Path("{leagueId}/requests/{playerId}")
-    @ApiOperation(value = "Request to join an existing player to a league")
+    @ApiOperation(value = "Request to join an existing player to a league", authorizations = @Authorization(value = "jwt-auth"))
     @ApiResponses(value =
     { @ApiResponse(code = 204, message = "Request sent successfully."),
+            @ApiResponse(code = 403, message = "User is not authorized."),
             @ApiResponse(code = 404, message = "League or player does not exist.") })
     @Timed
     public Response requestToJoinLeague(
@@ -162,10 +177,10 @@ public class LeagueResource
 
     @POST
     @Path("{leagueId}/players/{playerId}")
-    @ApiOperation(value = "Joins an existing player to a league")
+    @ApiOperation(value = "Joins an existing player to a league", authorizations = @Authorization(value = "jwt-auth"))
     @ApiResponses(value =
     { @ApiResponse(code = 204, message = "League joined successfully."),
-            @ApiResponse(code = 401, message = "Unauthorized to join this league."),
+            @ApiResponse(code = 403, message = "User is not authorized."),
             @ApiResponse(code = 404, message = "League or player does not exist.") })
     @Timed
     @RolesAllowed(
@@ -200,9 +215,10 @@ public class LeagueResource
 
     @DELETE
     @Path("{leagueId}/players/{playerId}")
-    @ApiOperation(value = "Makes an existing player quit a league")
+    @ApiOperation(value = "Makes an existing player quit a league", authorizations = @Authorization(value = "jwt-auth"))
     @ApiResponses(value =
     { @ApiResponse(code = 204, message = "League left successfully."),
+            @ApiResponse(code = 403, message = "User is not authorized."),
             @ApiResponse(code = 404, message = "League or player does not exist.") })
     @Timed
     public Response leaveLeague(
@@ -225,9 +241,10 @@ public class LeagueResource
 
     @GET
     @Path("{leagueId}/players")
-    @ApiOperation(value = "Returns all players from league")
+    @ApiOperation(value = "Returns all players from league", authorizations = @Authorization(value = "jwt-auth"))
     @ApiResponses(value =
     { @ApiResponse(code = 200, message = "Players returned successfully.", response = Player.class, responseContainer = "List"),
+            @ApiResponse(code = 403, message = "User is not authorized."),
             @ApiResponse(code = 404, message = "League does not exist.") })
     @Timed
     public Response getLeaguePlayers(

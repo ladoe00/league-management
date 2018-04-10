@@ -2,6 +2,7 @@ package org.nnhl.resources;
 
 import java.util.List;
 
+import javax.annotation.security.PermitAll;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -37,6 +38,7 @@ import io.swagger.annotations.ApiResponses;
 @Path("/players")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
+@PermitAll
 public class PlayerResource
 {
     private final PlayerDAO playerDao;
