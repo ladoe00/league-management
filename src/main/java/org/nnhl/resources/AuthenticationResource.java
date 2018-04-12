@@ -10,14 +10,12 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.jose4j.jws.AlgorithmIdentifiers;
 import org.jose4j.jws.JsonWebSignature;
 import org.jose4j.jwt.JwtClaims;
-import org.jose4j.keys.HmacKey;
 import org.jose4j.lang.JoseException;
 import org.nnhl.api.Player;
 import org.nnhl.api.Role;
-import org.nnhl.core.Secrets;
+import org.nnhl.auth.JWTConfiguration;
 import org.nnhl.db.PlayerDAO;
 
 import com.codahale.metrics.annotation.Timed;
@@ -38,9 +36,22 @@ public class AuthenticationResource
 {
     private final PlayerDAO playerDao;
 
-    public AuthenticationResource(PlayerDAO playerDao)
+    public AuthenticationResource(PlayerDAO playerDao) throws JoseException
     {
         this.playerDao = playerDao;
+    }
+
+    @GET
+    @Path("publicKey")
+    @ApiOperation(value = "Returns the public key used by this server.")
+    @ApiResponses(value =
+    { @ApiResponse(code = 200, message = "Player authenticated successfully.") })
+    @Produces(MediaType.APPLICATION_JSON)
+    @Timed
+    public Response getPublicKey()
+    {
+        String publicKeyJwkString = JWTConfiguration.getInstance().getPublicKey();
+        return Response.ok(publicKeyJwkString).build();
     }
 
     @GET
@@ -77,13 +88,7 @@ public class AuthenticationResource
         claims.setStringClaim("firstName", player.getFirstName());
         claims.setStringClaim("lastName", player.getLastName());
         claims.setStringClaim("position", player.getPosition().name());
-        claims.setIssuedAtToNow();
-        claims.setGeneratedJwtId();
-
-        final JsonWebSignature jws = new JsonWebSignature();
-        jws.setPayload(claims.toJson());
-        jws.setAlgorithmHeaderValue(AlgorithmIdentifiers.HMAC_SHA256);
-        jws.setKey(new HmacKey(Secrets.JWT_SECRET_KEY));
-        return jws;
+        JWTConfiguration.getInstance().configureClaims(claims);
+        return JWTConfiguration.getInstance().createJsonWebSignature(claims);
     }
 }

@@ -10,15 +10,14 @@ import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import org.glassfish.jersey.server.filter.RolesAllowedDynamicFeature;
 import org.jdbi.v3.core.Jdbi;
 import org.jose4j.jwt.consumer.JwtConsumer;
-import org.jose4j.jwt.consumer.JwtConsumerBuilder;
 import org.jose4j.jwt.consumer.JwtContext;
-import org.jose4j.keys.HmacKey;
+import org.jose4j.lang.JoseException;
 import org.nnhl.api.Player;
 import org.nnhl.auth.BasicAuthenticator;
+import org.nnhl.auth.JWTConfiguration;
 import org.nnhl.auth.JwtAuthenticator;
 import org.nnhl.auth.PlayerAuthorizer;
 import org.nnhl.core.DAOManager;
-import org.nnhl.core.Secrets;
 import org.nnhl.db.UnableToExecuteStatementExceptionMapper;
 import org.nnhl.resources.AuthenticationResource;
 import org.nnhl.resources.GameResource;
@@ -72,7 +71,7 @@ public class ManagementApplication extends Application<ManagementConfiguration>
     }
 
     @Override
-    public void run(final ManagementConfiguration configuration, final Environment environment)
+    public void run(final ManagementConfiguration configuration, final Environment environment) throws JoseException
     {
         // Enable CORS headers
         final FilterRegistration.Dynamic cors = environment.servlets().addFilter("CORS", CrossOriginFilter.class);
@@ -96,12 +95,13 @@ public class ManagementApplication extends Application<ManagementConfiguration>
                 .register(new GameResource(manager.leagueDao, manager.gameDao, manager.lineupDao, manager.playerDao));
 
         final AuthFilter<BasicCredentials, PrincipalImpl> basicFilter = new BasicCredentialAuthFilter.Builder<PrincipalImpl>()
-                .setAuthenticator(new BasicAuthenticator(manager.playerDao)).buildAuthFilter();
+                .setAuthenticator(new BasicAuthenticator(manager.playerDao))
+                .buildAuthFilter();
 
-        final JwtConsumer consumer = new JwtConsumerBuilder().setAllowedClockSkewInSeconds(300).setRequireSubject()
-                .setVerificationKey(new HmacKey(Secrets.JWT_SECRET_KEY)).build();
+        final JwtConsumer consumer = JWTConfiguration.getInstance().createJwtConsumer();
+        final JwtAuthenticator authenticator = new JwtAuthenticator();
         final AuthFilter<JwtContext, Player> jwtAuthFilter = new JwtAuthFilter.Builder<Player>()
-                .setJwtConsumer(consumer).setRealm("realm").setPrefix("Bearer").setAuthenticator(new JwtAuthenticator())
+                .setJwtConsumer(consumer).setRealm("realm").setPrefix("Bearer").setAuthenticator(authenticator)
                 .setAuthorizer(new PlayerAuthorizer(manager.playerDao)).buildAuthFilter();
 
         final PolymorphicAuthDynamicFeature feature = new PolymorphicAuthDynamicFeature<>(
