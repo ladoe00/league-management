@@ -1,5 +1,10 @@
 package org.nnhl.auth;
 
+import java.io.IOException;
+import java.io.StringWriter;
+
+import org.bouncycastle.util.io.pem.PemObject;
+import org.bouncycastle.util.io.pem.PemWriter;
 import org.jose4j.jwa.AlgorithmConstraints;
 import org.jose4j.jwa.AlgorithmConstraints.ConstraintType;
 import org.jose4j.jwk.JsonWebKey;
@@ -52,7 +57,18 @@ public final class JWTConfiguration
 
     public String getPublicKey()
     {
-        return rsaJsonWebKey.toJson(JsonWebKey.OutputControlLevel.PUBLIC_ONLY);
+    	PemObject pemObject = new PemObject("PUBLIC KEY", rsaJsonWebKey.getRsaPublicKey().getEncoded());
+		
+    	StringWriter sr = new StringWriter();    	
+		try (PemWriter pemWriter = new PemWriter(sr)) 
+		{
+			pemWriter.writeObject(pemObject);
+		} 
+		catch (IOException e) {
+            throw new RuntimeException(e);
+		}
+		
+    	return sr.toString();
     }
 
     public void configureClaims(JwtClaims claims)
