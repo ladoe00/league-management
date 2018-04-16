@@ -46,7 +46,7 @@ public class AuthenticationResource
     @ApiOperation(value = "Returns the public key used by this server.")
     @ApiResponses(value =
     { @ApiResponse(code = 200, message = "Player authenticated successfully.") })
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.TEXT_PLAIN)
     @Timed
     public Response getPublicKey()
     {
