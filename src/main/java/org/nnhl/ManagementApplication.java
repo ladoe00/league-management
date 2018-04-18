@@ -4,6 +4,8 @@ import java.util.EnumSet;
 
 import javax.servlet.DispatcherType;
 import javax.servlet.FilterRegistration;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import org.eclipse.jetty.servlets.CrossOriginFilter;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
@@ -33,6 +35,7 @@ import io.dropwizard.auth.AuthFilter;
 import io.dropwizard.auth.PolymorphicAuthDynamicFeature;
 import io.dropwizard.auth.PolymorphicAuthValueFactoryProvider;
 import io.dropwizard.auth.PrincipalImpl;
+import io.dropwizard.auth.UnauthorizedHandler;
 import io.dropwizard.auth.basic.BasicCredentialAuthFilter;
 import io.dropwizard.auth.basic.BasicCredentials;
 import io.dropwizard.jdbi3.JdbiFactory;
@@ -94,14 +97,24 @@ public class ManagementApplication extends Application<ManagementConfiguration>
         environment.jersey()
                 .register(new GameResource(manager.leagueDao, manager.gameDao, manager.lineupDao, manager.playerDao));
 
+        final UnauthorizedHandler noWWWAuthenticateHandler = new UnauthorizedHandler()
+        {
+            @Override
+            public Response buildResponse(String prefix, String realm)
+            {
+                return Response.status(Status.UNAUTHORIZED).build();
+            }
+        };
         final AuthFilter<BasicCredentials, PrincipalImpl> basicFilter = new BasicCredentialAuthFilter.Builder<PrincipalImpl>()
                 .setAuthenticator(new BasicAuthenticator(manager.playerDao))
+                .setUnauthorizedHandler(noWWWAuthenticateHandler)
                 .buildAuthFilter();
 
         final JwtConsumer consumer = JWTConfiguration.getInstance().createJwtConsumer();
         final JwtAuthenticator authenticator = new JwtAuthenticator();
         final AuthFilter<JwtContext, Player> jwtAuthFilter = new JwtAuthFilter.Builder<Player>()
-                .setJwtConsumer(consumer).setRealm("realm").setPrefix("Bearer").setAuthenticator(authenticator)
+                .setJwtConsumer(consumer).setRealm("realm").setPrefix("Bearer")
+                .setAuthenticator(authenticator)
                 .setAuthorizer(new PlayerAuthorizer(manager.playerDao)).buildAuthFilter();
 
         final PolymorphicAuthDynamicFeature feature = new PolymorphicAuthDynamicFeature<>(

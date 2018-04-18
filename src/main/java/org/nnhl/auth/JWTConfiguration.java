@@ -7,7 +7,6 @@ import org.bouncycastle.util.io.pem.PemObject;
 import org.bouncycastle.util.io.pem.PemWriter;
 import org.jose4j.jwa.AlgorithmConstraints;
 import org.jose4j.jwa.AlgorithmConstraints.ConstraintType;
-import org.jose4j.jwk.JsonWebKey;
 import org.jose4j.jwk.RsaJsonWebKey;
 import org.jose4j.jwk.RsaJwkGenerator;
 import org.jose4j.jws.AlgorithmIdentifiers;
@@ -57,18 +56,19 @@ public final class JWTConfiguration
 
     public String getPublicKey()
     {
-    	PemObject pemObject = new PemObject("PUBLIC KEY", rsaJsonWebKey.getRsaPublicKey().getEncoded());
-		
-    	StringWriter sr = new StringWriter();    	
-		try (PemWriter pemWriter = new PemWriter(sr)) 
-		{
-			pemWriter.writeObject(pemObject);
-		} 
-		catch (IOException e) {
+        PemObject pemObject = new PemObject("PUBLIC KEY", rsaJsonWebKey.getRsaPublicKey().getEncoded());
+
+        StringWriter sr = new StringWriter();
+        try (PemWriter pemWriter = new PemWriter(sr))
+        {
+            pemWriter.writeObject(pemObject);
+        }
+        catch (IOException e)
+        {
             throw new RuntimeException(e);
-		}
-		
-    	return sr.toString();
+        }
+
+        return sr.toString();
     }
 
     public void configureClaims(JwtClaims claims)
