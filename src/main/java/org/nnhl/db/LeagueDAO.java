@@ -9,6 +9,7 @@ import org.jdbi.v3.sqlobject.statement.SqlQuery;
 import org.jdbi.v3.sqlobject.statement.SqlUpdate;
 import org.nnhl.api.League;
 import org.nnhl.api.Player;
+import org.nnhl.api.Request;
 import org.nnhl.api.Subscription;
 
 public interface LeagueDAO
@@ -94,5 +95,9 @@ public interface LeagueDAO
     @SqlQuery("SELECT l.id, l.name from nnhl.league l INNER JOIN nnhl.league_player p WHERE p.playerId = :playerId AND l.id = p.leagueId")
     @RegisterRowMapper(LeagueMapper.class)
     List<League> getLeagues(@Bind("playerId") int playerId);
+
+    @SqlQuery("SELECT p.id, p.firstname, p.lastname, p.email, p.position, lr.subscription from nnhl.league_request lr INNER JOIN nnhl.player p WHERE lr.playerId = p.id AND lr.leagueId = :leagueId")
+    @RegisterRowMapper(RequestMapper.class)
+    List<Request> getLeagueRequests(@Bind("leagueId") int leagueId);
 
 }
