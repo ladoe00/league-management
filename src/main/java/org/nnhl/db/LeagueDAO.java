@@ -38,6 +38,9 @@ public interface LeagueDAO
     void insertRequestToJoinLeague(@Bind("leagueId") int leagueId, @Bind("playerId") int playerId,
             @Bind("subscription") Subscription subscription);
 
+    @SqlUpdate("DELETE FROM nnhl.league_request WHERE leagueId = :leagueId AND playerId = :playerId")
+    void deleteLeagueRequest(@Bind("leagueId") int leagueId, @Bind("playerId") int playerId);
+
     @SqlUpdate("DELETE FROM nnhl.league_player WHERE leagueId = :leagueId AND playerId = :playerId")
     void deleteLeaguePlayer(@Bind("leagueId") int leagueId, @Bind("playerId") int playerId);
 

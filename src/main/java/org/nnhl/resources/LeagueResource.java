@@ -225,7 +225,11 @@ public class LeagueResource
                 return Responses.notFound("Player does not exist");
             }
             System.out.println(principal.getEmail());
+            
             leagueDao.joinLeague(player, league, subscription);
+            // Now that the player has joined the league, delete the request to join that league
+            leagueDao.deleteLeagueRequest(leagueId, playerId);
+            
             return Response.noContent().build();
         }
         else
