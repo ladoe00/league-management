@@ -157,6 +157,8 @@ public class LeagueResource
             @ApiResponse(code = 403, message = "User is not authorized."),
             @ApiResponse(code = 404, message = "League does not exist.") })
     @Timed
+    @RolesAllowed(
+    { Role.Names.ADMIN, Role.Names.MANAGER })
     public Response getLeagueRequests(
     		@ApiParam(required = true, value = "Id of the league to join") @PathParam("leagueId") int leagueId) 
     {
@@ -224,12 +226,8 @@ public class LeagueResource
             {
                 return Responses.notFound("Player does not exist");
             }
-            System.out.println(principal.getEmail());
-            
-            leagueDao.joinLeague(player, league, subscription);
-            // Now that the player has joined the league, delete the request to join that league
-            leagueDao.deleteLeagueRequest(leagueId, playerId);
-            
+            System.out.println(principal.getEmail());            
+            leagueDao.joinLeague(player, league, subscription);            
             return Response.noContent().build();
         }
         else

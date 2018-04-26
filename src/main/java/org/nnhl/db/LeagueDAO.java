@@ -1,12 +1,14 @@
 package org.nnhl.db;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.jdbi.v3.sqlobject.config.RegisterRowMapper;
 import org.jdbi.v3.sqlobject.customizer.Bind;
 import org.jdbi.v3.sqlobject.statement.GetGeneratedKeys;
 import org.jdbi.v3.sqlobject.statement.SqlQuery;
 import org.jdbi.v3.sqlobject.statement.SqlUpdate;
+import org.jdbi.v3.sqlobject.transaction.Transaction;
 import org.nnhl.api.League;
 import org.nnhl.api.Player;
 import org.nnhl.api.Request;
@@ -67,11 +69,18 @@ public interface LeagueDAO
         return league;
     }
 
+    @Transaction
     default void joinLeague(Player player, League league, Subscription subscription)
     {
-        if (league.getId().isPresent() && player.getId().isPresent())
+        Optional<Integer> leagueId = league.getId();
+        Optional<Integer> playerId = player.getId();
+        
+        if (leagueId.isPresent() && playerId.isPresent())
         {
-            this.insertLeaguePlayer(league.getId().get(), player.getId().get(), subscription);
+            this.insertLeaguePlayer(leagueId.get(), playerId.get(), subscription);
+            // Now that the player has joined the league, delete the request to join that league
+            this.deleteLeagueRequest(leagueId.get(), playerId.get());
+
         }
     }
 
