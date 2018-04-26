@@ -153,14 +153,15 @@ public class LeagueResource
     @Path("{leagueId}/requests")
     @ApiOperation(value = "Return the list of requests to join the specified league", authorizations = @Authorization(value = "jwt-auth"))
     @ApiResponses(value =
-    { @ApiResponse(code = 200, message = "Requests returned successfully.", response = Request.class),
+    { @ApiResponse(code = 200, message = "Requests returned successfully.", response = Request.class, responseContainer = "List"),
             @ApiResponse(code = 403, message = "User is not authorized."),
             @ApiResponse(code = 404, message = "League does not exist.") })
     @Timed
     @RolesAllowed(
     { Role.Names.ADMIN, Role.Names.MANAGER })
     public Response getLeagueRequests(
-    		@ApiParam(required = true, value = "Id of the league to join") @PathParam("leagueId") int leagueId) 
+    		@ApiParam(required = true, value = "Id of the league to join") @PathParam("leagueId") int leagueId,
+            @ApiParam(hidden = true) @Auth Player principal) 
     {
         League league = leagueDao.loadLeague(leagueId);
         if (league == null)
@@ -212,7 +213,7 @@ public class LeagueResource
             @ApiParam(required = true, value = "Id of the league to join") @PathParam("leagueId") int leagueId,
             @ApiParam(required = true, value = "Id of the player to join the league") @PathParam("playerId") int playerId,
             @ApiParam(required = true, value = "Player subscription type to the league") @DefaultValue("REGULAR") @QueryParam("subscription") Subscription subscription,
-            @Auth Player principal)
+            @ApiParam(hidden = true) @Auth Player principal)
     {
         if (playerDao.getRoles(principal.getId().get()).contains(Role.ADMIN))
         {
