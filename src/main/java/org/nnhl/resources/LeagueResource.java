@@ -26,6 +26,7 @@ import org.hibernate.validator.constraints.NotBlank;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.nnhl.api.League;
 import org.nnhl.api.Player;
+import org.nnhl.api.Request;
 import org.nnhl.api.Role;
 import org.nnhl.api.Subscription;
 import org.nnhl.db.LeagueDAO;
@@ -148,6 +149,29 @@ public class LeagueResource
         return Response.ok(league).build();
     }
 
+    @GET
+    @Path("{leagueId}/requests")
+    @ApiOperation(value = "Return the list of requests to join the specified league", authorizations = @Authorization(value = "jwt-auth"))
+    @ApiResponses(value =
+    { @ApiResponse(code = 200, message = "Requests returned successfully.", response = Request.class, responseContainer = "List"),
+            @ApiResponse(code = 403, message = "User is not authorized."),
+            @ApiResponse(code = 404, message = "League does not exist.") })
+    @Timed
+    @RolesAllowed(
+    { Role.Names.ADMIN, Role.Names.MANAGER })
+    public Response getLeagueRequests(
+    		@ApiParam(required = true, value = "Id of the league to join") @PathParam("leagueId") int leagueId,
+            @ApiParam(hidden = true) @Auth Player principal) 
+    {
+        League league = leagueDao.loadLeague(leagueId);
+        if (league == null)
+        {
+            return Responses.notFound("League does not exist");
+        }
+        List<Request> leagueRequests = leagueDao.getLeagueRequests(leagueId);
+    	return Response.ok(leagueRequests).build();
+    }
+    
     @POST
     @Path("{leagueId}/requests/{playerId}")
     @ApiOperation(value = "Request to join an existing player to a league", authorizations = @Authorization(value = "jwt-auth"))
@@ -189,7 +213,7 @@ public class LeagueResource
             @ApiParam(required = true, value = "Id of the league to join") @PathParam("leagueId") int leagueId,
             @ApiParam(required = true, value = "Id of the player to join the league") @PathParam("playerId") int playerId,
             @ApiParam(required = true, value = "Player subscription type to the league") @DefaultValue("REGULAR") @QueryParam("subscription") Subscription subscription,
-            @Auth Player principal)
+            @ApiParam(hidden = true) @Auth Player principal)
     {
         if (playerDao.getRoles(principal.getId().get()).contains(Role.ADMIN))
         {
@@ -203,8 +227,8 @@ public class LeagueResource
             {
                 return Responses.notFound("Player does not exist");
             }
-            System.out.println(principal.getEmail());
-            leagueDao.joinLeague(player, league, subscription);
+            System.out.println(principal.getEmail());            
+            leagueDao.joinLeague(player, league, subscription);            
             return Response.noContent().build();
         }
         else

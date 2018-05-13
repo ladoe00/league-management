@@ -96,7 +96,8 @@ public class GameResource
     public List<Game> createNewSeason(
             @ApiParam(required = true, value = "Id of the league") @QueryParam("leagueId") int leagueId,
             @ApiParam(required = true, value = "Date of the first game (format: 'YYYY-MM-DD')") @QueryParam("startDate") LocalDateParam startDateParam,
-            @ApiParam(required = true, value = "Number of games") @QueryParam("numberOfGames") int numberOfGames)
+            @ApiParam(required = true, value = "Number of games") @QueryParam("numberOfGames") int numberOfGames,
+            @ApiParam(hidden = true) @Auth Player principal)
     {
         League league = leagueDao.loadLeague(leagueId);
         LocalDate startDate = startDateParam.get();

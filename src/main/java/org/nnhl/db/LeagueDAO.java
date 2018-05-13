@@ -1,14 +1,17 @@
 package org.nnhl.db;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.jdbi.v3.sqlobject.config.RegisterRowMapper;
 import org.jdbi.v3.sqlobject.customizer.Bind;
 import org.jdbi.v3.sqlobject.statement.GetGeneratedKeys;
 import org.jdbi.v3.sqlobject.statement.SqlQuery;
 import org.jdbi.v3.sqlobject.statement.SqlUpdate;
+import org.jdbi.v3.sqlobject.transaction.Transaction;
 import org.nnhl.api.League;
 import org.nnhl.api.Player;
+import org.nnhl.api.Request;
 import org.nnhl.api.Subscription;
 
 public interface LeagueDAO
@@ -37,6 +40,9 @@ public interface LeagueDAO
     void insertRequestToJoinLeague(@Bind("leagueId") int leagueId, @Bind("playerId") int playerId,
             @Bind("subscription") Subscription subscription);
 
+    @SqlUpdate("DELETE FROM nnhl.league_request WHERE leagueId = :leagueId AND playerId = :playerId")
+    void deleteLeagueRequest(@Bind("leagueId") int leagueId, @Bind("playerId") int playerId);
+
     @SqlUpdate("DELETE FROM nnhl.league_player WHERE leagueId = :leagueId AND playerId = :playerId")
     void deleteLeaguePlayer(@Bind("leagueId") int leagueId, @Bind("playerId") int playerId);
 
@@ -63,11 +69,18 @@ public interface LeagueDAO
         return league;
     }
 
+    @Transaction
     default void joinLeague(Player player, League league, Subscription subscription)
     {
-        if (league.getId().isPresent() && player.getId().isPresent())
+        Optional<Integer> leagueId = league.getId();
+        Optional<Integer> playerId = player.getId();
+        
+        if (leagueId.isPresent() && playerId.isPresent())
         {
-            this.insertLeaguePlayer(league.getId().get(), player.getId().get(), subscription);
+            this.insertLeaguePlayer(leagueId.get(), playerId.get(), subscription);
+            // Now that the player has joined the league, delete the request to join that league
+            this.deleteLeagueRequest(leagueId.get(), playerId.get());
+
         }
     }
 
@@ -94,5 +107,9 @@ public interface LeagueDAO
     @SqlQuery("SELECT l.id, l.name from nnhl.league l INNER JOIN nnhl.league_player p WHERE p.playerId = :playerId AND l.id = p.leagueId")
     @RegisterRowMapper(LeagueMapper.class)
     List<League> getLeagues(@Bind("playerId") int playerId);
+
+    @SqlQuery("SELECT p.id, p.firstname, p.lastname, p.email, p.position, lr.subscription from nnhl.league_request lr INNER JOIN nnhl.player p WHERE lr.playerId = p.id AND lr.leagueId = :leagueId")
+    @RegisterRowMapper(RequestMapper.class)
+    List<Request> getLeagueRequests(@Bind("leagueId") int leagueId);
 
 }
